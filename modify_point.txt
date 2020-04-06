@@ -1,0 +1,4 @@
+core/kernel/network/traci   line:793
+
+sumo_inflow['route'] = 'route{}_{}'.format(sumo_inflow['route'],0)
+routes_data.append(_flow(**sumo_inflow))
