@@ -178,6 +178,10 @@ class Env(gym.Env):
         # store the initial vehicle ids
         self.initial_ids = deepcopy(self.network.vehicles.ids)
 
+        # store the intention dict
+        self.intention_dict =  self.env_params.additional_params['intention']
+        self.n_unique_intentions = len(set(self.intention_dict.values()))
+
         # store the initial state of the vehicles kernel (needed for restarting
         # the simulation)
         self.k.vehicle.kernel_api = None
@@ -347,7 +351,11 @@ class Env(gym.Env):
             # network, including RL and SUMO-controlled vehicles
             routing_ids = []
             routing_actions = []
+
+            changing_color_list = []
+
             for veh_id in self.k.vehicle.get_ids():
+
                 if self.k.vehicle.get_routing_controller(veh_id) \
                         is not None:
                     routing_ids.append(veh_id)
@@ -355,7 +363,10 @@ class Env(gym.Env):
                         veh_id)
                     routing_actions.append(route_contr.choose_route(self))
 
+                # if self.k.vehicle.get_x_by_id(veh_id) == -1001:
+                #     changing_color_list.append(veh_id)
 
+            # print(changing_color_list)
             self.k.vehicle.choose_routes(routing_ids, routing_actions)
 
 
@@ -372,13 +383,14 @@ class Env(gym.Env):
             # update the colors of vehicles
             if self.sim_params.render:
                 self.k.vehicle.update_vehicle_colors()
+                # for veh_ind in changing_color_list:
+                #     self.k.vehicle.set_color(veh_ind,(0,0,255))
 
             # crash encodes whether the simulator experienced a collision
-            crash = self.k.simulation.check_collision()
+            crash_ids = self.k.simulation.check_collision()
 
-            # stop collecting new simulation steps if there is a collision
-            if crash:
-                break
+            # if crash_ids:
+            #     print("crash ids",crash_ids)
 
             # render a frame
             self.render()
@@ -387,7 +399,6 @@ class Env(gym.Env):
 
         # collect information of the state of the network based on the
         # environment class used
-        self.state = np.asarray(states).T
 
         # collect observation new state associated with action
         next_observation = np.copy(states)
@@ -402,11 +413,9 @@ class Env(gym.Env):
 
         # print (self.k.vehicle.num_vehicles)
         # compute the reward
-        if self.env_params.clip_actions:
-            rl_clipped = self.clip_actions(rl_actions)
-            reward = self.compute_reward(rl_clipped, fail=crash)
-        else:
-            reward = self.compute_reward(rl_actions, fail=crash)
+
+        reward = self.compute_reward(rl_actions, fail=crash_ids)
+
 
         return next_observation, reward, done, infos
 

@@ -2,3 +2,31 @@ core/kernel/network/traci   line:793
 
 sumo_inflow['route'] = 'route{}_{}'.format(sumo_inflow['route'],0)
 routes_data.append(_flow(**sumo_inflow))
+
+
+core/kernel/simulation/traci.py line 139-line 140
+Add 2 lines:
+sumo_call.append("--collision.action")
+sumo_call.append("warn")
+
+
+core/kernel/simulation/traci.py line 139-line 140
+# return self.kernel_api.simulation.getStartingTeleportNumber() != 0
+return self.kernel_api.simulation.getCollidingVehiclesIDList()
+
+
+core/kernel/vehicle/traci.py
+
+line 945 change to
+	def apply_lane_change(self, veh_ids, direction, duration=10000):
+
+Line 971-973 change to
+	       if target_lane != this_lane:
+                  self.kernel_api.vehicle.changeLane(
+                     veh_id, int(target_lane), duration)
+
+Final position: add function
+    def get_absolute_position(self, veh_id):
+        if isinstance(veh_id, (list, np.ndarray)):
+            return [self.get_absolute_position(vehID, error) for vehID in veh_id]
+        return self.kernel_api.vehicle.getPosition(veh_id)

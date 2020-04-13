@@ -32,13 +32,13 @@ vehicles.add(veh_id="human",
              )
 
 vehicles.add(veh_id="merge_0",
-             lane_change_params = SumoLaneChangeParams('strategic'),
+             lane_change_params = SumoLaneChangeParams('aggressive'),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[0])
 
 vehicles.add(veh_id="merge_1",
-             lane_change_params = SumoLaneChangeParams('strategic'),
+             lane_change_params = SumoLaneChangeParams('aggressive'),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[1])
@@ -69,7 +69,7 @@ inflow.add(veh_type="merge_1",
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=True)
+sim_params = SumoParams(sim_step=0.1, restart_instance=False, render=True)
 # sim_params = SumoParams(sim_step=0.1, render=False)
 
 
@@ -77,7 +77,9 @@ sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=True)
 
 from specific_environment import MergeEnv
 
-env_params = EnvParams(additional_params={"intention":{"human":-1,"merge_0":0,"merge_1":1}})
+intention_dic = {"human":0,"merge_0":1,"merge_1":1} if NEAREST_MERGE else {"human":0,"merge_0":1,"merge_1":2}
+
+env_params = EnvParams(additional_params={"intention":intention_dic})
 
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
 additional_net_params['num_vehicles'] = NUM_HUMAN + NUM_MERGE_0 + NUM_MERGE_1
@@ -86,7 +88,7 @@ net_params = NetParams(inflows=inflow, additional_params=additional_net_params)
 
 network = HighwayRampsNetwork("highway_ramp",vehicles,net_params,initial_config)
 
-from flow.core.experiment import Experiment
+from experiment import Experiment
 
 flow_params = dict(
     exp_tag='test_network',
@@ -97,7 +99,7 @@ flow_params = dict(
     env=env_params,
     net=net_params,
     veh=vehicles,
-    initial=initial_config,
+    initial=initial_config
 )
 
 # number of time steps
@@ -105,4 +107,4 @@ flow_params['env'].horizon = 8000
 exp = Experiment(flow_params)
 
 # run the sumo simulation
-_ = exp.run(5)
+exp.run(5)
