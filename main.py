@@ -5,6 +5,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, Su
 
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
+import tensorflow as tf
 
 #######################################################
 ########### Configurations
@@ -17,6 +18,14 @@ NUM_MERGE_0 = 10
 NUM_MERGE_1 = 10
 
 VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
+
+flags = tf.app.flags
+FLAGS = flags.FLAGS
+
+flags.DEFINE_integer('hidden1', 32, 'Number of units in hidden layer 1.')
+flags.DEFINE_integer('hidden2', 16, 'Number of units in hidden layer 2.')
+
+flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 3.')
 
 #######################################################
 
