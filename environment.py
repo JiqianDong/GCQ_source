@@ -401,7 +401,7 @@ class Env(gym.Env):
         # environment class used
 
         # collect observation new state associated with action
-        next_observation = np.copy(states)
+        next_observation = states
 
         # test if the environment should terminate due to a collision or the
         # time horizon being met

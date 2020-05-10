@@ -19,13 +19,6 @@ NUM_MERGE_1 = 10
 
 VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
 
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-
-flags.DEFINE_integer('hidden1', 32, 'Number of units in hidden layer 1.')
-flags.DEFINE_integer('hidden2', 16, 'Number of units in hidden layer 2.')
-
-flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 3.')
 
 #######################################################
 
@@ -78,7 +71,7 @@ inflow.add(veh_type="merge_1",
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=False, render=True)
+sim_params = SumoParams(sim_step=0.1, restart_instance=False, render=False)
 # sim_params = SumoParams(sim_step=0.1, render=False)
 
 

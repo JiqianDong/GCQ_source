@@ -34,14 +34,19 @@ class MergeEnv(Env):
         num_lanes = self.net_params.additional_params['highway_lanes']
 
         ids = self.k.vehicle.get_ids()
-        # states = np.zeros([N,3+num_lanes+self.n_unique_intentions])
+        rl_ids = self.k.vehicle.get_rl_ids()
+        human_ids = self.k.vehicle.get_human_ids()
+        # assert len(ids) != len(human_ids) + len(rl_ids)
 
-        ids = None
+        ids = human_ids + rl_ids
+
         states = None
         dist_matrix = None
 
-        if ids:
+        if rl_ids: ## when there is rl_vehicles in the scenario
+
             states = np.zeros([len(ids),3+num_lanes+self.n_unique_intentions])
+
             # numerical data (speed, location)
             speeds = np.array(self.k.vehicle.get_speed(ids)).reshape(-1,1)
             positions = np.array([self.k.vehicle.get_absolute_position(i) for i in ids])
@@ -59,10 +64,13 @@ class MergeEnv(Env):
 
             # construct the adjacency matrix "non weighted"
             dist_matrix = euclidean_distances(positions)
-            dist_matrix[dist_matrix>20] = 0
-            dist_matrix[dist_matrix<20] = 1
 
-        return ids,states,dist_matrix
+            adjacency = np.zeros_like(dist_matrix)
+
+            adjacency[dist_matrix<10] = 1
+            adjacency[-len(rl_ids):,-len(rl_ids):] = 1
+
+        return states,dist_matrix,len(rl_ids)
 
     def compute_reward(self,rl_actions,**kwargs):
         crash_ids = kwargs["fail"]
