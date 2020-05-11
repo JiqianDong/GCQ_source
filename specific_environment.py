@@ -42,6 +42,7 @@ class MergeEnv(Env):
 
         states = None
         dist_matrix = None
+        rl_indices = None
 
         if rl_ids: ## when there is rl_vehicles in the scenario
 
@@ -67,10 +68,14 @@ class MergeEnv(Env):
 
             adjacency = np.zeros_like(dist_matrix)
 
-            adjacency[dist_matrix<10] = 1
+            adjacency[dist_matrix<20] = 1
             adjacency[-len(rl_ids):,-len(rl_ids):] = 1
 
-        return states,dist_matrix,len(rl_ids)
+            rl_indices = np.arange(len(human_ids),len(ids))
+            print(adjacency)
+            print(states)
+            print(rl_indices)
+        return states, dist_matrix, rl_indices
 
     def compute_reward(self,rl_actions,**kwargs):
         crash_ids = kwargs["fail"]

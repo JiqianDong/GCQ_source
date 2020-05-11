@@ -5,8 +5,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, Su
 
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
-import tensorflow as tf
-
+from graph_model import GraphicEncoder
 #######################################################
 ########### Configurations
 
@@ -89,6 +88,19 @@ additional_net_params['num_vehicles'] = NUM_HUMAN + NUM_MERGE_0 + NUM_MERGE_1
 net_params = NetParams(inflows=inflow, additional_params=additional_net_params)
 
 network = HighwayRampsNetwork("highway_ramp",vehicles,net_params,initial_config)
+
+
+
+############ BUILD RL MODEL ##############
+# num_lanes = 3
+# num_unique_intentions = len(set(intention_dic.values()))
+# feature_size = 3 + num_lanes + num_unique_intentions
+# rl_model = GraphicEncoder(feature_size)
+
+
+
+
+############ EXPERIMENTS ##############
 
 from experiment import Experiment
 

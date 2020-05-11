@@ -111,6 +111,7 @@ class Experiment:
                 if self.env.time_counter%100 == 99:
                     rl_ids = self.env.k.vehicle.get_rl_ids()
                     print("lane changing")
+                    np.savez()
                     return np.zeros(len(rl_ids))
                 else:
                     return None
@@ -127,6 +128,7 @@ class Experiment:
             for j in range(num_steps):
                 t0 = time.time()
                 state, reward, done, _ = self.env.step(rl_actions(state))
+
                 t1 = time.time()
                 times.append(1 / (t1 - t0))
 
