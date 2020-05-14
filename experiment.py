@@ -110,8 +110,9 @@ class Experiment:
             def rl_actions(*_):
                 if self.env.time_counter%100 == 99:
                     rl_ids = self.env.k.vehicle.get_rl_ids()
-                    print("lane changing")
-                    np.savez()
+                    # print("lane changing")
+                    print(state)
+                    np.savez('state.npz',state)
                     return np.zeros(len(rl_ids))
                 else:
                     return None

@@ -403,10 +403,11 @@ class Env(gym.Env):
         # collect observation new state associated with action
         next_observation = states
 
-        # test if the environment should terminate due to a collision or the
-        # time horizon being met
-        done = (self.time_counter >= self.env_params.warmup_steps +
-                self.env_params.horizon)  # or crash
+        # environment terminates when all the rl vehicles left
+
+        done = len(self.k.vehicle.get_rl_ids())==0
+        # done = (self.time_counter >= self.env_params.warmup_steps +
+        #         self.env_params.horizon)  # or crash
 
         # compute the info for each agent
         infos = {}
@@ -543,10 +544,10 @@ class Env(gym.Env):
 
         # collect information of the state of the network based on the
         # environment class used
-        self.state = np.asarray(states).T
+        # self.state = np.asarray(states).T
 
         # observation associated with the reset (no warm-up steps)
-        observation = np.copy(states)
+        observation = states
 
         # perform (optional) warm-up steps before training
         for _ in range(self.env_params.warmup_steps):

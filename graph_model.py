@@ -22,5 +22,5 @@ class GraphicEncoder():
         x = Lambda(lambda x: gather(x,RL_indice),name='slice')(x)
 
         model = Model(inputs = [X_in,A_in,RL_indice], outputs=x)
-        print(model.summary())
+        # print(model.summary())
         return model

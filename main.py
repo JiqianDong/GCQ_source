@@ -5,7 +5,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, Su
 
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
-from graph_model import GraphicEncoder
+# from graph_model import GraphicEncoder
 #######################################################
 ########### Configurations
 
@@ -84,6 +84,8 @@ env_params = EnvParams(additional_params={"intention":intention_dic})
 
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
 additional_net_params['num_vehicles'] = NUM_HUMAN + NUM_MERGE_0 + NUM_MERGE_1
+additional_net_params['num_cav'] = NUM_MERGE_0 + NUM_MERGE_1
+additional_net_params['num_hv'] = NUM_HUMAN
 
 net_params = NetParams(inflows=inflow, additional_params=additional_net_params)
 
