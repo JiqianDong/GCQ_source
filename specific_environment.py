@@ -1,10 +1,11 @@
 from environment import Env
 import numpy as np
 from sklearn.metrics.pairwise import euclidean_distances
+import time
 
 from gym.spaces.box import Box
 from gym.spaces import Discrete
-from gym.spaces.dict import Dict
+from gym.spaces import Tuple
 
 class MergeEnv(Env):
 
@@ -20,12 +21,12 @@ class MergeEnv(Env):
         adjacency = Box(low=0, high=1, shape = (N,N), dtype=np.int32)
         mask = Box(low=0, high=1, shape = (N,), dtype=np.int32)
 
-        return Dict({'states':states,'adjacency':adjacency,'mask':mask})
+        return Tuple(states,adjacency,mask)
 
     @property
     def action_space(self):
-
-        return Box(low=0,high=1,shape(N,),dtype=np.int32)
+        N = self.net_params.additional_params['num_vehicles']
+        return Box(low=0,high=1,shape=(N,),dtype=np.int32)
         # return Discrete(3)
 
 
@@ -92,20 +93,58 @@ class MergeEnv(Env):
             # print(adjacency)
             # print(states)
             # print(mask)
+            self.observed_cavs = rl_ids
 
-        return {"states":states, "adjacency":adjacency, "mask":mask}
+        return states, adjacency, mask
 
     def compute_reward(self,rl_actions,**kwargs):
+        unit = 1
+        # reward for system speed
+        # all_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+
+        # reward for satisfying intention ---- only a big instant reward
+        intention_reward = 0
+        rl_veh_ids = self.k.vehicle.get_rl_ids()
+        for veh_id in rl_veh_ids:
+            if veh_id not in self.exited_vehicles: # check if exited already
+                current_edge = self.k.vehicle.get_edge(veh_id)
+
+                if current_edge.startswith('off_ramp') :
+                    veh_type = self.k.vehicle.get_type(veh_id)
+                    current_route = self.k.vehicle.get_route(veh_id)
+                    self.exited_vehicles.append(veh_id)
+                    # print('exited_vehicles',self.exited_vehicles)
+                    intention_reward += unit * (current_edge[-1] == veh_type[-1])
+                    # print('intention_reward',intention_reward)
+
+
+        # penalty for drastic lane changing behavors
+        # total_lane_change_penalty = 0
+        # for veh_id in rl_veh_ids:
+        #     if self.time_counter - self.k.vehicle.get_last_lc(veh_id)<20:
+        #         print("drastic change",veh_id)
+        #         print(self.time_counter)
+        #         print(self.k.vehicle.get_last_lc(veh_id))
+        #         # time.sleep(1)
+        #         total_lane_change_penalty -= unit
+
+        # penalty for crashing
+        total_crash_penalty = 0
         crash_ids = kwargs["fail"]
-        if crash_ids:
-            print("crash_ids: ",crash_ids)
-            return -1 * len(crash_ids)
-        return 1
+        total_crash_penalty = len(crash_ids) * unit
+        # if crash_ids:
+        #     # time.sleep(1)
+        #     print(crash_ids,total_crash_penalty)
+
+
+        return intention_reward - total_crash_penalty
 
     def apply_rl_actions(self, rl_actions=None):
         if isinstance(rl_actions,np.ndarray):
-            rl_actions = np.array(rl_actions)
+            # print(rl_actions.shape)
+            # rl_actions = rl_actions.reshape((self.net_params.additional_params['num_cav'],3))
             rl_actions -=1
-            rl_ids = self.k.vehicle.get_rl_ids()
-            self.k.vehicle.apply_lane_change(rl_ids, rl_actions)
+            rl_ids = self.observed_cavs
+
+            self.k.vehicle.apply_lane_change(rl_ids, rl_actions,2)
         return None

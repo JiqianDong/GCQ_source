@@ -6,7 +6,7 @@ import logging
 import time
 import os
 import numpy as np
-
+import pickle
 
 class Experiment:
     """
@@ -108,38 +108,52 @@ class Experiment:
 
         if rl_actions is None:
             def rl_actions(*_):
-                if self.env.time_counter%100 == 99:
-                    rl_ids = self.env.k.vehicle.get_rl_ids()
-                    # print("lane changing")
-                    print(state)
-                    np.savez('state.npz',state)
-                    return np.zeros(len(rl_ids))
+                rl_ids = self.env.k.vehicle.get_rl_ids()
+                if rl_ids:
+                    if (self.env.time_counter-self.env.env_params.warmup_steps)%100 == 99:
+                        print('lane change')
+                        return np.zeros(len(rl_ids))
+                    else:
+                        return np.ones(len(rl_ids))
                 else:
                     return None
 
         # time profiling information
         t = time.time()
         times = []
+        states = []
+        rewards = []
+        dones = []
+        actions = []
 
         for i in range(num_runs):
             ret = 0
             vel = []
             custom_vals = {key: [] for key in self.custom_callables.keys()}
             state = self.env.reset()
+
             for j in range(num_steps):
                 t0 = time.time()
-                state, reward, done, _ = self.env.step(rl_actions(state))
-
+                action = rl_actions(state)
+                state, reward, done, _ = self.env.step(action)
+                states.append(state)
+                rewards.append(reward)
+                actions.append(action)
+                dones.append(done)
                 t1 = time.time()
                 times.append(1 / (t1 - t0))
 
                 # Compute the velocity speeds and cumulative returns.
-                veh_ids = self.env.k.vehicle.get_ids()
-                vel.append(np.mean(self.env.k.vehicle.get_speed(veh_ids)))
-                ret += reward
+                # veh_ids = self.env.k.vehicle.get_ids()
+                # vel.append(np.mean(self.env.k.vehicle.get_speed(veh_ids)))
+                # ret += reward
 
                 if done:
+                    print('finished')
                     break
+        experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
+        with open('training_data.pkl','wb') as f:
+            pickle.dump(experience,f)
 
         self.env.terminate()
 

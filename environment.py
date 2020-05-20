@@ -182,6 +182,12 @@ class Env(gym.Env):
         self.intention_dict =  self.env_params.additional_params['intention']
         self.n_unique_intentions = len(set(self.intention_dict.values()))
 
+        # store the vehicle ids that have exited the main road
+        self.exited_vehicles = []
+
+        # store the observed vehicles when get states
+        self.observed_cavs = None
+
         # store the initial state of the vehicles kernel (needed for restarting
         # the simulation)
         self.k.vehicle.kernel_api = None
@@ -189,6 +195,7 @@ class Env(gym.Env):
         self.initial_vehicles = deepcopy(self.k.vehicle)
         self.k.vehicle.kernel_api = self.k.kernel_api
         self.k.vehicle.master_kernel = self.k
+
 
         self.setup_initial_state()
 
@@ -363,9 +370,6 @@ class Env(gym.Env):
                         veh_id)
                     routing_actions.append(route_contr.choose_route(self))
 
-                # if self.k.vehicle.get_x_by_id(veh_id) == -1001:
-                #     changing_color_list.append(veh_id)
-
             # print(changing_color_list)
             self.k.vehicle.choose_routes(routing_ids, routing_actions)
 
@@ -397,17 +401,15 @@ class Env(gym.Env):
 
         states = self.get_state()
 
-        # collect information of the state of the network based on the
-        # environment class used
 
         # collect observation new state associated with action
         next_observation = states
 
         # environment terminates when all the rl vehicles left
 
-        done = len(self.k.vehicle.get_rl_ids())==0
-        # done = (self.time_counter >= self.env_params.warmup_steps +
-        #         self.env_params.horizon)  # or crash
+        done = (len(self.exited_vehicles) == self.net_params.additional_params['num_cav'])
+        if done:
+            print('done')
 
         # compute the info for each agent
         infos = {}
@@ -438,6 +440,7 @@ class Env(gym.Env):
         """
         # reset the time counter
         self.time_counter = 0
+        self.exited_vehicles = []
 
         # warn about not using restart_instance when using inflows
         if len(self.net_params.inflows.get()) > 0 and \
@@ -540,14 +543,14 @@ class Env(gym.Env):
                 msg += '- {}: {}\n'.format(veh_id, self.initial_state[veh_id])
             raise FatalFlowError(msg=msg)
 
-        states = self.get_state()
+        observation = self.get_state()
+
 
         # collect information of the state of the network based on the
         # environment class used
         # self.state = np.asarray(states).T
 
         # observation associated with the reset (no warm-up steps)
-        observation = states
 
         # perform (optional) warm-up steps before training
         for _ in range(self.env_params.warmup_steps):
