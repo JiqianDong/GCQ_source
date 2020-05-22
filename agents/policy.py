@@ -1,5 +1,40 @@
-from rl.policy import Policy
 import numpy as np
+
+class Policy(object):
+    """Abstract base class for all implemented policies.
+
+    Each policy helps with selection of action to take on an environment.
+
+    Do not use this abstract base class directly but instead use one of the concrete policies implemented.
+    To implement your own policy, you have to implement the following methods:
+
+    - `select_action`
+
+    # Arguments
+        agent (rl.core.Agent): Agent used
+    """
+    def _set_agent(self, agent):
+        self.agent = agent
+
+    @property
+    def metrics_names(self):
+        return []
+
+    @property
+    def metrics(self):
+        return []
+
+    def select_action(self, **kwargs):
+        raise NotImplementedError()
+
+    def get_config(self):
+        """Return configuration of the policy
+
+        # Returns
+            Configuration as dict
+        """
+        return {}
+
 
 class greedy_q_policy(Policy):
     def select_action(self,q_vals):

@@ -5,9 +5,9 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Lambda, Input, Layer, Dense
 
-from .rl_lib.core import Agent
-from .rl_lib.policy import EpsGreedyQPolicy, GreedyQPolicy
-from .rl_lib.util import *
+from rl.core import Agent
+from rl.policy import EpsGreedyQPolicy, GreedyQPolicy
+from rl.util import *
 
 
 def mean_q(y_true, y_pred):
@@ -17,7 +17,7 @@ def mean_q(y_true, y_pred):
 class AbstractDQNAgent(Agent):
     """Write me
     """
-    def __init__(self, nb_total_agents,nb_actions, memory, gamma=.99, batch_size=32, nb_steps_warmup=1000,
+    def __init__(self, nb_actions, memory, gamma=.99, batch_size=32, nb_steps_warmup=1000,
                  train_interval=1, memory_interval=1, target_model_update=10000,
                  delta_range=None, delta_clip=np.inf, custom_model_objects={}, **kwargs):
         super(AbstractDQNAgent, self).__init__(**kwargs)
@@ -37,7 +37,6 @@ class AbstractDQNAgent(Agent):
             delta_clip = delta_range[1]
 
         # Parameters.
-        self.nb_agents = nb_total_agents
         self.nb_actions = nb_actions
         self.gamma = gamma
         self.batch_size = batch_size
@@ -55,27 +54,25 @@ class AbstractDQNAgent(Agent):
         self.compiled = False
 
     def process_state_batch(self, batch):
+        batch = np.array(batch)
         if self.processor is None:
-            batch = np.array(batch)
             return batch
         return self.processor.process_state_batch(batch)
 
     def compute_batch_q_values(self, state_batch):
         batch = self.process_state_batch(state_batch)
         q_values = self.model.predict_on_batch(batch)
-        assert q_values.shape == (len(state_batch), self.nb_agents, self.nb_actions)
-        # print(q_values)
+        assert q_values.shape == (len(state_batch), self.nb_actions)
         return q_values
 
     def compute_q_values(self, state):
-        q_values = self.compute_batch_q_values([state])[0]
-        assert q_values.shape == (self.nb_actions,self.nb_agents)
+        q_values = self.compute_batch_q_values([state]).flatten()
+        assert q_values.shape == (self.nb_actions,)
         return q_values
 
     def get_config(self):
         return {
             'nb_actions': self.nb_actions,
-            'nb_agents':self.nb_agents,
             'gamma': self.gamma,
             'batch_size': self.batch_size,
             'nb_steps_warmup': self.nb_steps_warmup,
@@ -103,16 +100,15 @@ class DQNAgent(AbstractDQNAgent):
             `naive`: Q(s,a;theta) = V(s;theta) + A(s,a;theta)
 
     """
-    def __init__(self, model, policy=None, test_policy=None, enable_double_dqn=True, enable_dueling_network=False,
+    def __init__(self, model, policy=None, test_policy=None, enable_double_dqn=False, enable_dueling_network=False,
                  dueling_type='avg', *args, **kwargs):
         super(DQNAgent, self).__init__(*args, **kwargs)
 
-
         # Validate (important) input.
-        # if hasattr(model.output, '__len__') and len(model.output) > 1:
-        #     raise ValueError('Model "{}" has more than one output. DQN expects a model that has a single output.'.format(model))
-        # if model.output._keras_shape != (None, self.nb_actions):
-        #     raise ValueError('Model output "{}" has invalid shape. DQN expects a model that has one dimension for each action, in this case {}.'.format(model.output, self.nb_actions))
+        if hasattr(model.output, '__len__') and len(model.output) > 1:
+            raise ValueError('Model "{}" has more than one output. DQN expects a model that has a single output.'.format(model))
+        if model.output._keras_shape != (None, self.nb_actions):
+            raise ValueError('Model output "{}" has invalid shape. DQN expects a model that has one dimension for each action, in this case {}.'.format(model.output, self.nb_actions))
 
         # Parameters.
         self.enable_double_dqn = enable_double_dqn
@@ -134,9 +130,9 @@ class DQNAgent(AbstractDQNAgent):
             # dueling_type == 'naive'
             # Q(s,a;theta) = V(s;theta) + A(s,a;theta)
             if self.dueling_type == 'avg':
-                outputlayer = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:] - K.mean(a[:, 1:], keepdims=True), output_shape=(nb_action,))(y)
+                outputlayer = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:] - K.mean(a[:, 1:], axis=1, keepdims=True), output_shape=(nb_action,))(y)
             elif self.dueling_type == 'max':
-                outputlayer = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:] - K.max(a[:, 1:], keepdims=True), output_shape=(nb_action,))(y)
+                outputlayer = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:] - K.max(a[:, 1:], axis=1, keepdims=True), output_shape=(nb_action,))(y)
             elif self.dueling_type == 'naive':
                 outputlayer = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:], output_shape=(nb_action,))(y)
             else:
@@ -186,16 +182,15 @@ class DQNAgent(AbstractDQNAgent):
             y_true, y_pred, mask = args
             loss = huber_loss(y_true, y_pred, self.delta_clip)
             loss *= mask  # apply element-wise mask
-            return K.sum(K.sum(loss, axis=-1),axis=-1)
+            return K.sum(loss, axis=-1)
 
         # Create trainable model. The problem is that we need to mask the output since we only
         # ever want to update the Q values for a certain action. The way we achieve this is by
         # using a custom Lambda layer that computes the loss. This gives us the necessary flexibility
         # to mask out certain parameters by passing in multiple inputs to the Lambda layer.
-
         y_pred = self.model.output
-        y_true = Input(name='y_true', shape=(self.nb_agents, self.nb_actions))
-        mask = Input(name='mask', shape=(self.nb_agents, self.nb_actions))
+        y_true = Input(name='y_true', shape=(self.nb_actions,))
+        mask = Input(name='mask', shape=(self.nb_actions,))
         loss_out = Lambda(clipped_masked_error, output_shape=(1,), name='loss')([y_true, y_pred, mask])
         ins = [self.model.input] if type(self.model.input) is not list else self.model.input
         trainable_model = Model(inputs=ins + [y_true, mask], outputs=[loss_out, y_pred])
@@ -256,7 +251,6 @@ class DQNAgent(AbstractDQNAgent):
 
         # Train the network on a single stochastic batch.
         if self.step > self.nb_steps_warmup and self.step % self.train_interval == 0:
-            # print("training")
             experiences = self.memory.sample(self.batch_size)
             assert len(experiences) == self.batch_size
 
@@ -278,8 +272,6 @@ class DQNAgent(AbstractDQNAgent):
             state1_batch = self.process_state_batch(state1_batch)
             terminal1_batch = np.array(terminal1_batch)
             reward_batch = np.array(reward_batch)
-
-
             assert reward_batch.shape == (self.batch_size,)
             assert terminal1_batch.shape == reward_batch.shape
             assert len(action_batch) == len(reward_batch)
@@ -290,48 +282,39 @@ class DQNAgent(AbstractDQNAgent):
                 # (van Hasselt et al., 2015), in Double DQN, the online network predicts the actions
                 # while the target network is used to estimate the Q value.
                 q_values = self.model.predict_on_batch(state1_batch)
-                # assert q_values.shape == (self.batch_size, self.nb_actions)
-                actions = np.argmax(q_values, axis=-1)  #(batch, )
+                assert q_values.shape == (self.batch_size, self.nb_actions)
+                actions = np.argmax(q_values, axis=1)
                 assert actions.shape == (self.batch_size,)
 
                 # Now, estimate Q values using the target network but select the values with the
                 # highest Q value wrt to the online model (as computed above).
                 target_q_values = self.target_model.predict_on_batch(state1_batch)
-                # assert target_q_values.shape == (self.batch_size, self.nb_actions)
+                assert target_q_values.shape == (self.batch_size, self.nb_actions)
                 q_batch = target_q_values[range(self.batch_size), actions]
             else:
                 # Compute the q_values given state1, and extract the maximum for each sample in the batch.
                 # We perform this prediction on the target_model instead of the model for reasons
                 # outlined in Mnih (2015). In short: it makes the algorithm more stable.
                 target_q_values = self.target_model.predict_on_batch(state1_batch)
-                # assert target_q_values.shape == (self.batch_size, self.nb_actions)
-                q_batch = np.max(target_q_values, axis=-1)
+                assert target_q_values.shape == (self.batch_size, self.nb_actions)
+                q_batch = np.max(target_q_values, axis=1).flatten()
+            assert q_batch.shape == (self.batch_size,)
 
-            assert q_batch.shape == (self.batch_size, self.nb_agents)
-
-            targets = np.zeros((self.batch_size, self.nb_agents, self.nb_actions))
-            dummy_targets = np.zeros((self.batch_size, self.nb_agents))
-            masks = np.zeros((self.batch_size, self.nb_agents, self.nb_actions))
+            targets = np.zeros((self.batch_size, self.nb_actions))
+            dummy_targets = np.zeros((self.batch_size,))
+            masks = np.zeros((self.batch_size, self.nb_actions))
 
             # Compute r_t + gamma * max_a Q(s_t+1, a) and update the target targets accordingly,
             # but only for the affected output units (as given by action_batch).
-
-            discounted_reward_batch = self.gamma * q_batch  # (batch_size * nb_agents)
-
+            discounted_reward_batch = self.gamma * q_batch
             # Set discounted reward to zero for all states that were terminal.
-            discounted_reward_batch *= (terminal1_batch.reshape(-1,1).dot(np.ones([1,self.nb_agents]))) # (batch_size * nb_agents)
-
-            # assert discounted_reward_batch.shape == reward_batch.shape
-            Rs = reward_batch.reshape(-1,1) + discounted_reward_batch # (batch_size * nb_agemts)
-            assert Rs.shape == (self.batch_size, self.nb_agents)
-
-            for idx, (target, mask, R, action, state) in enumerate(zip(targets, masks, Rs, action_batch, state0_batch)):
-                rl_indices = state[2].astype(bool)
-                action = action[rl_indices]
-
-                target[rl_indices, action] = R[action].reshape(1,-1)  # update action with estimated accumulated reward
-                dummy_targets[idx] = R.reshape(1,-1)
-                mask[rl_indices, action] = 1.  # enable loss for this specific action
+            discounted_reward_batch *= terminal1_batch
+            assert discounted_reward_batch.shape == reward_batch.shape
+            Rs = reward_batch + discounted_reward_batch
+            for idx, (target, mask, R, action) in enumerate(zip(targets, masks, Rs, action_batch)):
+                target[action] = R  # update action with estimated accumulated reward
+                dummy_targets[idx] = R
+                mask[action] = 1.  # enable loss for this specific action
             targets = np.array(targets).astype('float32')
             masks = np.array(masks).astype('float32')
 
@@ -448,7 +431,7 @@ class NAFLayer(Layer):
                 try:
                     # Old TF behavior.
                     L_flat = tf.concat(1, [zeros, L_flat])
-                except TypeError:
+                except (TypeError, ValueError):
                     # New TF behavior
                     L_flat = tf.concat([zeros, L_flat], 1)
 
@@ -517,7 +500,7 @@ class NAFLayer(Layer):
                 try:
                     # Old TF behavior.
                     L_flat = tf.concat(1, [zeros, L_flat])
-                except TypeError:
+                except (TypeError, ValueError):
                     # New TF behavior
                     L_flat = tf.concat([zeros, L_flat], 1)
 

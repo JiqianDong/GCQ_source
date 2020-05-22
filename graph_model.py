@@ -79,7 +79,7 @@ class GraphicPolicyKeras():
         x3 = Dense(num_outputs, activation='relu',name='policy_3')(x2)
         mask = Reshape((N,1),name='expend_dim')(RL_indice)
         out = Multiply(name='filter')([x3,mask])
-        out = Flatten('name'='action_flatten')(out)
+        out = Flatten(name='action_flatten')(out)
 
         #### Value out
         x2 = Flatten(name='value_flatten')(x2)
@@ -104,7 +104,7 @@ class GraphicQNetworkKeras():
         self.action_space = action_space
         self.num_outputs = num_outputs
         self.name = name
-        self.base_model = self.build_model(N,F,num_outputs)
+        self.base_model = self.build_model(N,F,self.num_outputs)
 
     def build_model(self,N,F,num_outputs):
         X_in = Input(shape=(N,F), name='X_in')
@@ -121,7 +121,7 @@ class GraphicQNetworkKeras():
         x2 = Dense(16,activation='relu',name='policy_2')(x1)
 
         ###  Action and filter
-        x3 = Dense(num_outputs, activation='relu',name='policy_3')(x2)
+        x3 = Dense(num_outputs, activation='linear',name='policy_3')(x2)
         mask = Reshape((N,1),name='expend_dim')(RL_indice)
         qout = Multiply(name='filter')([x3,mask])
 

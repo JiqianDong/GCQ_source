@@ -10,8 +10,10 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-TEST_SETTINGS = True
-# TEST_SETTINGS = False
+# TEST_SETTINGS = True
+TEST_SETTINGS = False
+
+RAY_RL = False
 
 
 NEAREST_MERGE = False
@@ -75,7 +77,7 @@ inflow.add(veh_type="merge_1",
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=True)
+sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=False)
 # sim_params = SumoParams(sim_step=0.1, render=False)
 
 
@@ -103,7 +105,6 @@ network = HighwayRampsNetwork("highway_ramp",vehicles,net_params,initial_config)
 # num_unique_intentions = len(set(intention_dic.values()))
 # feature_size = 3 + num_lanes + num_unique_intentions
 # rl_model = GraphicEncoder(feature_size)
-
 
 flow_params = dict(
     exp_tag='test_network',
@@ -208,7 +209,7 @@ if TEST_SETTINGS:
 
     # run the sumo simulation
     exp.run(1)
-else:
+elif RAY_RL:
     import ray
     from ray.rllib.models import ModelCatalog
     from graph_model import GraphicPolicy
@@ -241,8 +242,15 @@ else:
             "training_iteration": 1,
         },
     }
-
-
     exp_config['restore'] = './'
     run_experiments({flow_params["exp_tag"]: exp_config})
+
+else:
+    from rl_experiments import Experiment
+
+    exp = Experiment(flow_params)
+
+    # run the sumo simulation
+    exp.run(1)
+
 
