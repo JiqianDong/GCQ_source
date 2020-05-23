@@ -104,12 +104,12 @@ class GraphicQNetworkKeras():
         self.action_space = action_space
         self.num_outputs = num_outputs
         self.name = name
-        self.base_model = self.build_model(N,F,self.num_outputs)
+        self.base_model = self.build_model(N,F,num_outputs)
 
     def build_model(self,N,F,num_outputs):
         X_in = Input(shape=(N,F), name='X_in')
         A_in = Input(shape=(N,N), name='A_in')
-        RL_indice = Input(shape=(N), name='mask')
+        RL_indice = Input(shape=(N), name='rl_indice_in')
 
         ### Graphic convolution
 
@@ -122,8 +122,8 @@ class GraphicQNetworkKeras():
 
         ###  Action and filter
         x3 = Dense(num_outputs, activation='linear',name='policy_3')(x2)
-        mask = Reshape((N,1),name='expend_dim')(RL_indice)
-        qout = Multiply(name='filter')([x3,mask])
+        filt = Reshape((N,1),name='expend_dim')(RL_indice)
+        qout = Multiply(name='filter')([x3,filt])
 
         model = Model(inputs = [X_in,A_in,RL_indice], outputs=[qout])
         print(model.summary())

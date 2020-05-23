@@ -90,17 +90,29 @@ class Experiment:
         F = 9
         N = 40
         A = 3
+
+        from gym.spaces.box import Box
+        from gym.spaces import Discrete
+        from gym.spaces.dict import Dict
+        states = Box(low=-np.inf, high=np.inf, shape=(N,F), dtype=np.float32)
+        adjacency = Box(low=0, high=1, shape = (N,N), dtype=np.int32)
+        mask = Box(low=0, high=1, shape = (N,), dtype=np.int32)
+
+        obs_space = Dict({'states':states,'adjacency':adjacency,'mask':mask})
+        act_space = Box(low=0, high=1, shape = (N,), dtype=np.int32)
+
         from graph_model import GraphicQNetworkKeras
         from agents.memory import CustomerSequentialMemory
         from agents.processor import Jiqian_MultiInputProcessor
         from agents.dqn import DQNAgent
         from agents.policy import eps_greedy_q_policy,greedy_q_policy,random_obs_policy
-
+        from spektral.layers import GraphConv
+        from tensorflow.keras.optimizers import Adam
 
         memory_buffer = CustomerSequentialMemory(limit=5000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
 
-        rl_model = GraphicQNetworkKeras(N,F, self.env.observation_space, self.env.action_space)
+        rl_model = GraphicQNetworkKeras(N,F,obs_space,act_space)
 
 
         my_dqn = DQNAgent(processor= multi_input_processor,
@@ -114,4 +126,4 @@ class Experiment:
                           custom_model_objects={'GraphConv': GraphConv})
 
         my_dqn.compile(Adam(0.001))
-        my_dqn.fit(self.env, nb_steps=10, visualize=True, verbose=1, log_interval=1)
+        my_dqn.fit(self.env, nb_steps=10, visualize=False, verbose=1, log_interval=1)

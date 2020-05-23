@@ -9,9 +9,10 @@ import numpy as np
 # import wandb
 
 from tensorflow.keras import __version__ as KERAS_VERSION
-from tensorflow.keras.callbacks import Callback as KerasCallback
+from keras.callbacks import Callback as KerasCallback,CallbackList as KerasCallbackList
 # from tensorflow.keras.callbacks import CallbackList as KerasCallbackList
-from tensorflow.keras.utils.generic_utils import Progbar
+# from tensorflow.keras.utils.generic_utils import Progbar
+from tensorflow.keras.utils import Progbar
 
 
 class Callback(KerasCallback):
@@ -43,64 +44,64 @@ class Callback(KerasCallback):
         pass
 
 
-# class CallbackList(KerasCallbackList):
-#     def _set_env(self, env):
-#         """ Set environment for each callback in callbackList """
-#         for callback in self.callbacks:
-#             if callable(getattr(callback, '_set_env', None)):
-#                 callback._set_env(env)
+class CallbackList(KerasCallbackList):
+    def _set_env(self, env):
+        """ Set environment for each callback in callbackList """
+        for callback in self.callbacks:
+            if callable(getattr(callback, '_set_env', None)):
+                callback._set_env(env)
 
-#     def on_episode_begin(self, episode, logs={}):
-#         """ Called at beginning of each episode for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             # Check if callback supports the more appropriate `on_episode_begin` callback.
-#             # If not, fall back to `on_epoch_begin` to be compatible with built-in Keras callbacks.
-#             if callable(getattr(callback, 'on_episode_begin', None)):
-#                 callback.on_episode_begin(episode, logs=logs)
-#             else:
-#                 callback.on_epoch_begin(episode, logs=logs)
+    def on_episode_begin(self, episode, logs={}):
+        """ Called at beginning of each episode for each callback in callbackList"""
+        for callback in self.callbacks:
+            # Check if callback supports the more appropriate `on_episode_begin` callback.
+            # If not, fall back to `on_epoch_begin` to be compatible with built-in Keras callbacks.
+            if callable(getattr(callback, 'on_episode_begin', None)):
+                callback.on_episode_begin(episode, logs=logs)
+            else:
+                callback.on_epoch_begin(episode, logs=logs)
 
-#     def on_episode_end(self, episode, logs={}):
-#         """ Called at end of each episode for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             # Check if callback supports the more appropriate `on_episode_end` callback.
-#             # If not, fall back to `on_epoch_end` to be compatible with built-in Keras callbacks.
-#             if callable(getattr(callback, 'on_episode_end', None)):
-#                 callback.on_episode_end(episode, logs=logs)
-#             else:
-#                 callback.on_epoch_end(episode, logs=logs)
+    def on_episode_end(self, episode, logs={}):
+        """ Called at end of each episode for each callback in callbackList"""
+        for callback in self.callbacks:
+            # Check if callback supports the more appropriate `on_episode_end` callback.
+            # If not, fall back to `on_epoch_end` to be compatible with built-in Keras callbacks.
+            if callable(getattr(callback, 'on_episode_end', None)):
+                callback.on_episode_end(episode, logs=logs)
+            else:
+                callback.on_epoch_end(episode, logs=logs)
 
-#     def on_step_begin(self, step, logs={}):
-#         """ Called at beginning of each step for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             # Check if callback supports the more appropriate `on_step_begin` callback.
-#             # If not, fall back to `on_batch_begin` to be compatible with built-in Keras callbacks.
-#             if callable(getattr(callback, 'on_step_begin', None)):
-#                 callback.on_step_begin(step, logs=logs)
-#             else:
-#                 callback.on_batch_begin(step, logs=logs)
+    def on_step_begin(self, step, logs={}):
+        """ Called at beginning of each step for each callback in callbackList"""
+        for callback in self.callbacks:
+            # Check if callback supports the more appropriate `on_step_begin` callback.
+            # If not, fall back to `on_batch_begin` to be compatible with built-in Keras callbacks.
+            if callable(getattr(callback, 'on_step_begin', None)):
+                callback.on_step_begin(step, logs=logs)
+            else:
+                callback.on_batch_begin(step, logs=logs)
 
-#     def on_step_end(self, step, logs={}):
-#         """ Called at end of each step for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             # Check if callback supports the more appropriate `on_step_end` callback.
-#             # If not, fall back to `on_batch_end` to be compatible with built-in Keras callbacks.
-#             if callable(getattr(callback, 'on_step_end', None)):
-#                 callback.on_step_end(step, logs=logs)
-#             else:
-#                 callback.on_batch_end(step, logs=logs)
+    def on_step_end(self, step, logs={}):
+        """ Called at end of each step for each callback in callbackList"""
+        for callback in self.callbacks:
+            # Check if callback supports the more appropriate `on_step_end` callback.
+            # If not, fall back to `on_batch_end` to be compatible with built-in Keras callbacks.
+            if callable(getattr(callback, 'on_step_end', None)):
+                callback.on_step_end(step, logs=logs)
+            else:
+                callback.on_batch_end(step, logs=logs)
 
-#     def on_action_begin(self, action, logs={}):
-#         """ Called at beginning of each action for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             if callable(getattr(callback, 'on_action_begin', None)):
-#                 callback.on_action_begin(action, logs=logs)
+    def on_action_begin(self, action, logs={}):
+        """ Called at beginning of each action for each callback in callbackList"""
+        for callback in self.callbacks:
+            if callable(getattr(callback, 'on_action_begin', None)):
+                callback.on_action_begin(action, logs=logs)
 
-#     def on_action_end(self, action, logs={}):
-#         """ Called at end of each action for each callback in callbackList"""
-#         for callback in self.callbacks:
-#             if callable(getattr(callback, 'on_action_end', None)):
-#                 callback.on_action_end(action, logs=logs)
+    def on_action_end(self, action, logs={}):
+        """ Called at end of each action for each callback in callbackList"""
+        for callback in self.callbacks:
+            if callable(getattr(callback, 'on_action_end', None)):
+                callback.on_action_end(action, logs=logs)
 
 
 class TestLogger(Callback):

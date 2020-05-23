@@ -1,3 +1,4 @@
+import numpy as np
 class Processor(object):
     """Abstract base class for implementing processors.
 

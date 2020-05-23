@@ -8,7 +8,9 @@ from tensorflow.keras.layers import Lambda, Input, Layer, Dense
 from .rl_lib.core import Agent
 from .rl_lib.policy import EpsGreedyQPolicy, GreedyQPolicy
 from .rl_lib.util import *
+from spektral.layers import GraphConv
 
+from tensorflow.keras.utils import plot_model
 
 def mean_q(y_true, y_pred):
     return K.mean(K.max(y_pred, axis=-1))
@@ -69,7 +71,7 @@ class AbstractDQNAgent(Agent):
 
     def compute_q_values(self, state):
         q_values = self.compute_batch_q_values([state])[0]
-        assert q_values.shape == (self.nb_actions,self.nb_agents)
+        assert q_values.shape == (self.nb_agents,self.nb_actions)
         return q_values
 
     def get_config(self):
@@ -209,6 +211,8 @@ class DQNAgent(AbstractDQNAgent):
         self.trainable_model = trainable_model
 
         self.compiled = True
+
+        plot_model(self.trainable_model)
 
     def load_weights(self, filepath):
         self.model.load_weights(filepath)

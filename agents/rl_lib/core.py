@@ -5,14 +5,14 @@ from copy import deepcopy
 import numpy as np
 from tensorflow.keras.callbacks import History
 
-# from .callbacks import (
-#     CallbackList,
-#     TestLogger,
-#     TrainEpisodeLogger,
-#     TrainIntervalLogger,
-#     Visualizer,
-#     WandbLogger
-# )
+from .callbacks import (
+    CallbackList,
+    TestLogger,
+    TrainEpisodeLogger,
+    TrainIntervalLogger,
+    Visualizer,
+    # WandbLogger
+)
 
 
 class Agent(object):
