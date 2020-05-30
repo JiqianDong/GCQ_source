@@ -47,9 +47,9 @@ class GraphicQNetworkKeras():
         return model
 
 
-import pickle
-with open('training_data.pkl','rb') as f:
-    training_data = pickle.load(f)
+# import pickle
+# with open('training_data.pkl','rb') as f:
+#     training_data = pickle.load(f)
 
 
 from agents.memory import CustomerSequentialMemory

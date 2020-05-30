@@ -10,7 +10,7 @@ sumo_call.append("--collision.action")
 sumo_call.append("warn")
 
 
-core/kernel/simulation/traci.py line 139-line 140
+core/kernel/simulation/traci.py line 71-line 73 in check collision
 # return self.kernel_api.simulation.getStartingTeleportNumber() != 0
 return self.kernel_api.simulation.getCollidingVehiclesIDList()
 
@@ -49,3 +49,19 @@ Line 595-607 modify to:
         else:
             return self.__vehicles.get(veh_id, {}).get("last_lc", error)
             # return self.__vehicles.get(veh_id, {}).get("headway", error)
+
+
+
+flow/utils/registry.py
+line 93-102 modify to :
+
+        if isinstance(params["network"], str):
+            network = network_class(
+                name=exp_tag,
+                vehicles=vehicles,
+                net_params=net_params,
+                initial_config=initial_config,
+                traffic_lights=traffic_lights,
+            )
+        else:
+            network = network_class

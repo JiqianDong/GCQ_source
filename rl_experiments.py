@@ -86,9 +86,16 @@ class Experiment:
         logging.info("Initializing environment.")
 
 
-    def run(self,num_runs):
+    def run(self,num_runs,training,num_human,num_cav):
+        model_name = 'hv_'+str(num_human)+'_cav_'+str(num_cav)
+        logdir = "./logs/" + model_name
+        try:
+            os.rmdir(logdir)
+        except:
+            pass
+
         F = 9
-        N = 40
+        N = num_human + num_cav
         A = 3
 
         from gym.spaces.box import Box
@@ -108,6 +115,8 @@ class Experiment:
         from agents.policy import eps_greedy_q_policy,greedy_q_policy,random_obs_policy
         from spektral.layers import GraphConv
         from tensorflow.keras.optimizers import Adam
+        import tensorflow as tf
+        print("Eager execution:", tf.executing_eagerly())
 
         memory_buffer = CustomerSequentialMemory(limit=5000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
@@ -122,8 +131,21 @@ class Experiment:
                           nb_total_agents = N,
                           nb_actions = A,
                           memory = memory_buffer,
-                          nb_steps_warmup=10,
+                          nb_steps_warmup=100,
+                          batch_size=32,
                           custom_model_objects={'GraphConv': GraphConv})
 
-        my_dqn.compile(Adam(0.001))
-        my_dqn.fit(self.env, nb_steps=10, visualize=False, verbose=1, log_interval=1)
+        my_dqn.compile(Adam(0.0001))
+
+        if training:
+            from tensorflow.keras.callbacks import TensorBoard
+            # tensorboard_callback = TensorBoard(log_dir=logdir,histogram_freq=1,write_graph=False,update_freq='batch')
+            history = my_dqn.fit(self.env, nb_steps=10000, visualize=False, verbose=1, log_interval=5)
+            # print(history.history.keys())
+            my_dqn.save_weights('./models/dqn_{}.h5f'.format(model_name), overwrite=True)
+        else:
+            my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
+            print("succssfully loaded")
+            dqn.test(env,nb_episodes=10)
+
+

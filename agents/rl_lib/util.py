@@ -11,9 +11,8 @@ def clone_model(model, custom_objects={}):
         'class_name': model.__class__.__name__,
         'config': model.get_config(),
     }
-    # config = model.get_config()
+
     clone = model_from_config(config, custom_objects=custom_objects)
-    # clone = clone_model(model)
     clone.set_weights(model.get_weights())
     return clone
 

@@ -126,7 +126,7 @@ class GraphicQNetworkKeras():
         qout = Multiply(name='filter')([x3,filt])
 
         model = Model(inputs = [X_in,A_in,RL_indice], outputs=[qout])
-        print(model.summary())
+        # print(model.summary())
         return model
 
 

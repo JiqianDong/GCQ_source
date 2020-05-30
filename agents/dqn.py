@@ -212,7 +212,7 @@ class DQNAgent(AbstractDQNAgent):
 
         self.compiled = True
 
-        plot_model(self.trainable_model)
+        # plot_model(self.trainable_model)
 
     def load_weights(self, filepath):
         self.model.load_weights(filepath)
@@ -249,6 +249,8 @@ class DQNAgent(AbstractDQNAgent):
     def backward(self, reward, terminal):
         # Store most recent experience in memory.
         if self.step % self.memory_interval == 0:
+            assert len(self.recent_observation) == 3
+
             self.memory.append(self.recent_observation, self.recent_action, reward, terminal,
                                training=self.training)
 
@@ -296,13 +298,14 @@ class DQNAgent(AbstractDQNAgent):
                 q_values = self.model.predict_on_batch(state1_batch)
                 # assert q_values.shape == (self.batch_size, self.nb_actions)
                 actions = np.argmax(q_values, axis=-1)  #(batch, )
-                assert actions.shape == (self.batch_size,)
+                assert actions.shape == (self.batch_size,self.nb_agents)
 
                 # Now, estimate Q values using the target network but select the values with the
                 # highest Q value wrt to the online model (as computed above).
                 target_q_values = self.target_model.predict_on_batch(state1_batch)
                 # assert target_q_values.shape == (self.batch_size, self.nb_actions)
-                q_batch = target_q_values[range(self.batch_size), actions]
+                inds = np.expand_dims(actions,axis=2)
+                q_batch = np.squeeze(np.take_along_axis(target_q_values,inds,axis=-1),axis=2)
             else:
                 # Compute the q_values given state1, and extract the maximum for each sample in the batch.
                 # We perform this prediction on the target_model instead of the model for reasons
@@ -329,9 +332,15 @@ class DQNAgent(AbstractDQNAgent):
             Rs = reward_batch.reshape(-1,1) + discounted_reward_batch # (batch_size * nb_agemts)
             assert Rs.shape == (self.batch_size, self.nb_agents)
 
-            for idx, (target, mask, R, action, state) in enumerate(zip(targets, masks, Rs, action_batch, state0_batch)):
-                rl_indices = state[2].astype(bool)
+            # print(state0_batch)
+            for idx, (target, mask, R, action, state) in enumerate(zip(targets, masks, Rs, action_batch, state0_batch[-1])):
+                # print(state)
+                rl_indices = state.astype(bool)
+                if not rl_indices.all():
+                    continue
+                # print(rl_indices)
                 action = action[rl_indices]
+                # print(action)
 
                 target[rl_indices, action] = R[action].reshape(1,-1)  # update action with estimated accumulated reward
                 dummy_targets[idx] = R.reshape(1,-1)
@@ -344,11 +353,16 @@ class DQNAgent(AbstractDQNAgent):
             # it is still useful to know the actual target to compute metrics properly.
             ins = [state0_batch] if type(self.model.input) is not list else state0_batch
             metrics = self.trainable_model.train_on_batch(ins + [targets, masks], [dummy_targets, targets])
+            print('here',metrics)
+
             metrics = [metric for idx, metric in enumerate(metrics) if idx not in (1, 2)]  # throw away individual losses
+
             metrics += self.policy.metrics
             if self.processor is not None:
                 metrics += self.processor.metrics
-
+            print()
+            print(metrics)
+            # break
         if self.target_model_update >= 1 and self.step % self.target_model_update == 0:
             self.update_target_model_hard()
 

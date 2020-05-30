@@ -8,9 +8,9 @@ from tempfile import mkdtemp
 import numpy as np
 # import wandb
 
-from tensorflow.keras import __version__ as KERAS_VERSION
-from keras.callbacks import Callback as KerasCallback,CallbackList as KerasCallbackList
-# from tensorflow.keras.callbacks import CallbackList as KerasCallbackList
+from keras import __version__ as KERAS_VERSION
+from tensorflow.python.keras.callbacks import Callback as KerasCallback
+from tensorflow.python.keras.callbacks import CallbackList as KerasCallbackList
 # from tensorflow.keras.utils.generic_utils import Progbar
 from tensorflow.keras.utils import Progbar
 
@@ -102,6 +102,7 @@ class CallbackList(KerasCallbackList):
         for callback in self.callbacks:
             if callable(getattr(callback, 'on_action_end', None)):
                 callback.on_action_end(action, logs=logs)
+
 
 
 class TestLogger(Callback):
@@ -375,7 +376,7 @@ class FileLogger(Callback):
 class Visualizer(Callback):
     def on_action_end(self, action, logs):
         """ Render environment at the end of each action """
-        self.env.render(mode='human')
+        self.env.render()
 
 
 class ModelIntervalCheckpoint(Callback):

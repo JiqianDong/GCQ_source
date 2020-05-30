@@ -113,10 +113,15 @@ class Jiqian_MultiInputProcessor(Processor):
             self.nb_inputs = nb_inputs
 
     def process_state_batch(self, state_batch):
+        # print(state_batch)
         input_batches = [[] for x in range(self.nb_inputs)]
         # print((state_batch))
         for state in state_batch:
             for observation in state:
+                # if len(observation)!=self.nb_inputs:
+                #     print(len(observation))
+                #     print()
+                #     print(state)
                 assert len(observation) == self.nb_inputs
                 for idx,s in enumerate(observation):
                     input_batches[idx].append(s)
