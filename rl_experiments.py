@@ -116,7 +116,7 @@ class Experiment:
         from spektral.layers import GraphConv
         from tensorflow.keras.optimizers import Adam
         import tensorflow as tf
-        print("Eager execution:", tf.executing_eagerly())
+        # print("Eager execution:", tf.executing_eagerly())
 
         memory_buffer = CustomerSequentialMemory(limit=5000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
@@ -140,12 +140,12 @@ class Experiment:
         if training:
             from tensorflow.keras.callbacks import TensorBoard
             # tensorboard_callback = TensorBoard(log_dir=logdir,histogram_freq=1,write_graph=False,update_freq='batch')
-            history = my_dqn.fit(self.env, nb_steps=10000, visualize=False, verbose=1, log_interval=5)
+            history = my_dqn.fit(self.env, nb_steps=10000, visualize=False, verbose=1, log_interval=20)
             # print(history.history.keys())
             my_dqn.save_weights('./models/dqn_{}.h5f'.format(model_name), overwrite=True)
         else:
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
             print("succssfully loaded")
-            dqn.test(env,nb_episodes=10)
+            my_dqn.test(self.env,nb_episodes=10)
 
 

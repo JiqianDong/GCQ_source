@@ -295,7 +295,7 @@ class Agent(object):
             callbacks += [Visualizer()]
         history = History()
         callbacks += [history]
-        # callbacks = CallbackList(callbacks)
+        callbacks = CallbackList(callbacks)
         if hasattr(callbacks, 'set_model'):
             callbacks.set_model(self)
         else:

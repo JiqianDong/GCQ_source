@@ -12,7 +12,7 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 ########### Configurations
 # TEST_SETTINGS = True
 TEST_SETTINGS = False
-TRAINING = True
+TRAINING = False
 
 RAY_RL = False
 
@@ -91,6 +91,7 @@ sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER)
 from specific_environment import MergeEnv
 
 intention_dic = {"human":0,"merge_0":1,"merge_1":1} if NEAREST_MERGE else {"human":0,"merge_0":1,"merge_1":2}
+terminal_edges = ['off_ramp_0','off_ramp_1','highway_2']
 
 env_params = EnvParams(warmup_steps=50,additional_params={"intention":intention_dic})
 
@@ -98,6 +99,7 @@ additional_net_params = ADDITIONAL_NET_PARAMS.copy()
 additional_net_params['num_vehicles'] = NUM_HUMAN + NUM_MERGE_0 + NUM_MERGE_1
 additional_net_params['num_cav'] = NUM_MERGE_0 + NUM_MERGE_1
 additional_net_params['num_hv'] = NUM_HUMAN
+additional_net_params['terminal_edges'] = terminal_edges
 
 net_params = NetParams(inflows=inflow, additional_params=additional_net_params)
 
@@ -123,11 +125,12 @@ flow_params['env'].horizon = 8000
 
 ############ EXPERIMENTS ##############
 if TEST_SETTINGS:
+    print("this is the test for the environment")
     from experiment import Experiment
     exp = Experiment(flow_params)
 
     # run the sumo simulation
-    exp.run(1)
+    exp.run(3)
 elif RAY_RL:
     from ray_rl_setting import *
 else:
