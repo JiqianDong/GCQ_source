@@ -104,18 +104,7 @@ class MergeEnv(Env):
 
         # reward for satisfying intention ---- only a big instant reward
         intention_reward = 0
-        rl_veh_ids = self.k.vehicle.get_rl_ids()
-        for veh_id in rl_veh_ids:
-            if veh_id not in self.exited_vehicles: # check if exited already
-                current_edge = self.k.vehicle.get_edge(veh_id)
-
-                if current_edge.startswith('off_ramp') :
-                    veh_type = self.k.vehicle.get_type(veh_id)
-                    current_route = self.k.vehicle.get_route(veh_id)
-                    self.exited_vehicles.append(veh_id)
-                    # print('exited_vehicles',self.exited_vehicles)
-                    intention_reward += unit * (current_edge[-1] == veh_type[-1])
-                    # print('intention_reward',intention_reward)
+        kwargs['']
 
 
         # penalty for drastic lane changing behavors
