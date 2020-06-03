@@ -407,21 +407,7 @@ class Env(gym.Env):
         next_observation = states
 
         # environment terminates when all the rl vehicles left
-        rl_veh_ids = self.k.vehicle.get_rl_ids()
-
-        num_current_full_filled = 0
-        for rl_id in rl_veh_ids:
-            if rl_id not in self.exited_vehicles:
-                current_edge = self.k.vehicle.get_edge(rl_id)
-                if current_edge in self.terminal_edges:
-                    self.exited_vehicles.append(rl_id)
-                    veh_type = self.k.vehicle.get_type(rl_id)
-
-                    # check if satisfy the intention
-                    if (veh_type == 'merge_0' and current_edge == 'off_ramp_0') \
-                        or (veh_type == 'merge_1' and current_edge == 'off_ramp_1'):
-                        num_current_full_filled += 1
-                        print(rl_id)
+        num_current_full_filled = self.check_full_fill()
 
 
         done = (len(self.exited_vehicles) == self.net_params.additional_params['num_cav'])
@@ -434,7 +420,7 @@ class Env(gym.Env):
         # print (self.k.vehicle.num_vehicles)
         # compute the reward
 
-        reward = self.compute_reward(rl_actions, fail=crash_ids)
+        reward = self.compute_reward(rl_actions, fail=crash_ids,num_full_filled=num_current_full_filled)
 
 
         return next_observation, reward, done, infos

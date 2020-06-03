@@ -103,8 +103,10 @@ class MergeEnv(Env):
         # all_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
 
         # reward for satisfying intention ---- only a big instant reward
-        intention_reward = 0
-        kwargs['']
+        intention_reward = kwargs['num_full_filled'] * unit
+        if intention_reward>0:
+            print('current num_full_filled: ',kwargs['num_full_filled'])
+
 
 
         # penalty for drastic lane changing behavors
@@ -137,3 +139,20 @@ class MergeEnv(Env):
 
             self.k.vehicle.apply_lane_change(rl_ids, rl_actions,2)
         return None
+
+    def check_full_fill(self):
+        rl_veh_ids = self.k.vehicle.get_rl_ids()
+        num_current_full_filled = 0
+        for rl_id in rl_veh_ids:
+            if rl_id not in self.exited_vehicles:
+                current_edge = self.k.vehicle.get_edge(rl_id)
+                if current_edge in self.terminal_edges:
+                    self.exited_vehicles.append(rl_id)
+                    veh_type = self.k.vehicle.get_type(rl_id)
+
+                    # check if satisfy the intention
+                    if (veh_type == 'merge_0' and current_edge == 'off_ramp_0') \
+                        or (veh_type == 'merge_1' and current_edge == 'off_ramp_1'):
+                        num_current_full_filled += 1
+                        print('satisfied: ', rl_id)
+        return num_current_full_filled

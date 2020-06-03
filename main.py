@@ -10,8 +10,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-# TEST_SETTINGS = True
-TEST_SETTINGS = False
+TEST_SETTINGS = True
+# TEST_SETTINGS = False
 TRAINING = False
 
 RAY_RL = False
