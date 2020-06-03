@@ -388,14 +388,11 @@ class Env(gym.Env):
             # update the colors of vehicles
             if self.sim_params.render:
                 self.k.vehicle.update_vehicle_colors()
-                # for veh_ind in changing_color_list:
-                #     self.k.vehicle.set_color(veh_ind,(0,0,255))
+
 
             # crash encodes whether the simulator experienced a collision
             crash_ids = self.k.simulation.check_collision()
 
-            # if crash_ids:
-            #     print("crash ids",crash_ids)
 
             # render a frame
             self.render()
@@ -407,12 +404,12 @@ class Env(gym.Env):
         next_observation = states
 
         # environment terminates when all the rl vehicles left
-        num_current_full_filled = self.check_full_fill()
-
+        num_full_filled,num_half_filled = self.check_full_fill()
 
         done = (len(self.exited_vehicles) == self.net_params.additional_params['num_cav'])
         if done:
-            print('done')
+            print('done in: ', self.time_counter)
+
 
         # compute the info for each agent
         infos = {}
@@ -420,7 +417,7 @@ class Env(gym.Env):
         # print (self.k.vehicle.num_vehicles)
         # compute the reward
 
-        reward = self.compute_reward(rl_actions, fail=crash_ids,num_full_filled=num_current_full_filled)
+        reward = self.compute_reward(rl_actions, fail=crash_ids,num_full_filled=num_full_filled, num_half_filled=num_half_filled)
 
 
         return next_observation, reward, done, infos

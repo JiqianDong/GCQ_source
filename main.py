@@ -12,11 +12,15 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 ########### Configurations
 TEST_SETTINGS = True
 # TEST_SETTINGS = False
-TRAINING = False
+DEBUG = True
+
+TRAINING = True
+
+
 
 RAY_RL = False
 
-RENDER = True
+RENDER = False
 
 
 NEAREST_MERGE = False
@@ -119,7 +123,7 @@ flow_params = dict(
     veh=vehicles,
     initial=initial_config
 )
-# number of time steps
+# # number of time steps
 flow_params['env'].horizon = 8000
 
 
@@ -138,6 +142,6 @@ else:
 
     exp = Experiment(flow_params)
     # run the sumo simulation
-    exp.run(num_runs=1,training=TRAINING, num_human=NUM_HUMAN, num_cav=(NUM_MERGE_0+NUM_MERGE_1))
+    exp.run(num_runs=1,training=TRAINING, num_human=NUM_HUMAN, num_cav=(NUM_MERGE_0+NUM_MERGE_1),debug=DEBUG)
 
 

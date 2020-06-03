@@ -353,6 +353,7 @@ class FileLogger(Callback):
 
     def save_data(self):
         """ Save metrics in a json file """
+        print('here')
         if len(self.data.keys()) == 0:
             return
 

@@ -86,15 +86,34 @@ class Experiment:
         logging.info("Initializing environment.")
 
 
-    def run(self,num_runs,training,num_human,num_cav):
+    def run(self,num_runs,training,num_human,num_cav,debug):
         model_name = 'hv_'+str(num_human)+'_cav_'+str(num_cav)
+
+        if debug:
+            nb_steps_warmup = 10
+            batch_size = 5
+            total_steps = 100
+            log_interval = 20
+            nb_max_episode_steps = 20
+        else:
+            nb_steps_warmup = 500000
+            batch_size = 32
+            total_steps = 1000000
+            log_interval = 1000
+            nb_max_episode_steps = 3000
+
+
         logdir = "./logs/" + model_name
+        history_file = "./logs/training_hist.txt"
         try:
             os.rmdir(logdir)
+            os.remove(history_file)
+
         except:
             pass
 
-        F = 9
+
+        F = 3 + self.env.net_params.additional_params['highway_lanes'] + self.env.n_unique_intentions # input feature size
         N = num_human + num_cav
         A = 3
 
@@ -116,7 +135,6 @@ class Experiment:
         from spektral.layers import GraphConv
         from tensorflow.keras.optimizers import Adam
         import tensorflow as tf
-        # print("Eager execution:", tf.executing_eagerly())
 
         memory_buffer = CustomerSequentialMemory(limit=5000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
@@ -131,18 +149,26 @@ class Experiment:
                           nb_total_agents = N,
                           nb_actions = A,
                           memory = memory_buffer,
-                          nb_steps_warmup=100,
-                          batch_size=32,
+                          nb_steps_warmup=nb_steps_warmup,
+                          batch_size=batch_size,
                           custom_model_objects={'GraphConv': GraphConv})
 
-        my_dqn.compile(Adam(0.0001))
+        my_dqn.compile(Adam(0.001))
 
         if training:
-            from tensorflow.keras.callbacks import TensorBoard
-            # tensorboard_callback = TensorBoard(log_dir=logdir,histogram_freq=1,write_graph=False,update_freq='batch')
-            history = my_dqn.fit(self.env, nb_steps=10000, visualize=False, verbose=1, log_interval=20)
-            # print(history.history.keys())
+            from agents.rl_lib.callbacks import FileLogger
+
+            # from tensorflow.python.keras.callbacks import TensorBoard
+            # tensorboard_callback = TensorBoard(log_dir=logdir,histogram_freq=1,write_graph=True,update_freq='batch')
+
+            file_log = FileLogger(history_file)
+            history = my_dqn.fit(self.env, nb_steps=total_steps, nb_max_episode_steps=nb_max_episode_steps,visualize=False, verbose=1, log_interval=log_interval, callbacks=[file_log])
             my_dqn.save_weights('./models/dqn_{}.h5f'.format(model_name), overwrite=True)
+
+            from generate_training_plots import plot_training
+
+            plot_training(history_file)
+
         else:
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
             print("succssfully loaded")

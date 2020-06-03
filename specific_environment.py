@@ -103,10 +103,10 @@ class MergeEnv(Env):
         # all_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
 
         # reward for satisfying intention ---- only a big instant reward
-        intention_reward = kwargs['num_full_filled'] * unit
-        if intention_reward>0:
-            print('current num_full_filled: ',kwargs['num_full_filled'])
-
+        intention_reward = kwargs['num_full_filled'] * unit + kwargs['num_half_filled'] * unit * 0.5
+        # if intention_reward>0:
+        #     print('current num_full_filled: ',kwargs['num_full_filled'])
+        #     print('current num_half_filled: ',kwargs['num_half_filled'])
 
 
         # penalty for drastic lane changing behavors
@@ -142,7 +142,8 @@ class MergeEnv(Env):
 
     def check_full_fill(self):
         rl_veh_ids = self.k.vehicle.get_rl_ids()
-        num_current_full_filled = 0
+        num_full_filled = 0
+        num_half_filled = 0
         for rl_id in rl_veh_ids:
             if rl_id not in self.exited_vehicles:
                 current_edge = self.k.vehicle.get_edge(rl_id)
@@ -151,8 +152,17 @@ class MergeEnv(Env):
                     veh_type = self.k.vehicle.get_type(rl_id)
 
                     # check if satisfy the intention
-                    if (veh_type == 'merge_0' and current_edge == 'off_ramp_0') \
-                        or (veh_type == 'merge_1' and current_edge == 'off_ramp_1'):
-                        num_current_full_filled += 1
-                        print('satisfied: ', rl_id)
-        return num_current_full_filled
+
+                    if self.n_unique_intentions == 3: # specific merge
+                        if (veh_type == 'merge_0' and current_edge == 'off_ramp_0') \
+                            or (veh_type == 'merge_1' and current_edge == 'off_ramp_1'):
+                            num_full_filled += 1
+                            print('satisfied: ', rl_id)
+
+                    elif self.n_unique_intentions == 2: # nearest merge
+                        num_full_filled += (current_edge == 'off_ramp_0')*1
+                        num_half_filled += (current_edge == 'off_ramp_1')*1
+
+                    else:
+                        raise Exception("unknown num of unique n_unique_intentions")
+        return num_full_filled,num_half_filled

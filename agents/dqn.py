@@ -353,15 +353,14 @@ class DQNAgent(AbstractDQNAgent):
             # it is still useful to know the actual target to compute metrics properly.
             ins = [state0_batch] if type(self.model.input) is not list else state0_batch
             metrics = self.trainable_model.train_on_batch(ins + [targets, masks], [dummy_targets, targets])
-            print('here',metrics)
+            # print('here',metrics)
 
             metrics = [metric for idx, metric in enumerate(metrics) if idx not in (1, 2)]  # throw away individual losses
 
             metrics += self.policy.metrics
             if self.processor is not None:
                 metrics += self.processor.metrics
-            print()
-            print(metrics)
+            # print()
             # break
         if self.target_model_update >= 1 and self.step % self.target_model_update == 0:
             self.update_target_model_hard()

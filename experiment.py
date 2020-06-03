@@ -112,8 +112,8 @@ class Experiment:
                 if rl_ids:
                     if (self.env.time_counter-self.env.env_params.warmup_steps)%100 == 99:
                         print('lane change')
-                        # return np.random.choice(3,len(rl_ids))
-                        return np.zeros(len(rl_ids))
+                        return np.random.choice(3,len(rl_ids))
+                        # return np.zeros(len(rl_ids))
                     else:
                         return np.ones(len(rl_ids))
                 else:
@@ -150,9 +150,10 @@ class Experiment:
                 # ret += reward
 
                 if done:
-                    print('finished')
+
+                    print('finished with step:',j)
                     break
-        experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
+        # experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
         # with open('training_data.pkl','wb') as f:
         #     pickle.dump(experience,f)
 
