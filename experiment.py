@@ -153,8 +153,8 @@ class Experiment:
                     print('finished')
                     break
         experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
-        with open('training_data.pkl','wb') as f:
-            pickle.dump(experience,f)
+        # with open('training_data.pkl','wb') as f:
+        #     pickle.dump(experience,f)
 
         self.env.terminate()
 
