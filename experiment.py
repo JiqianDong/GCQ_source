@@ -151,7 +151,7 @@ class Experiment:
 
                 if done:
 
-                    print('finished with step:',j)
+                    print('finished with step: ',j)
                     break
         # experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
         # with open('training_data.pkl','wb') as f:

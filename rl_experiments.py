@@ -90,10 +90,10 @@ class Experiment:
         model_name = 'hv_'+str(num_human)+'_cav_'+str(num_cav)
 
         if debug:
-            nb_steps_warmup = 10
-            batch_size = 5
-            total_steps = 100
-            log_interval = 20
+            nb_steps_warmup = 30
+            batch_size = 10
+            total_steps = 200
+            log_interval = 40
             nb_max_episode_steps = 20
         else:
             nb_steps_warmup = 500000
@@ -146,6 +146,7 @@ class Experiment:
                           model = rl_model.base_model,
                           policy = eps_greedy_q_policy(),
                           test_policy = greedy_q_policy(),
+                          start_policy = random_obs_policy(),
                           nb_total_agents = N,
                           nb_actions = A,
                           memory = memory_buffer,

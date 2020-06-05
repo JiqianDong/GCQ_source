@@ -105,7 +105,7 @@ class DQNAgent(AbstractDQNAgent):
             `naive`: Q(s,a;theta) = V(s;theta) + A(s,a;theta)
 
     """
-    def __init__(self, model, policy=None, test_policy=None, enable_double_dqn=True, enable_dueling_network=False,
+    def __init__(self, model, policy=None, test_policy=None, start_policy=None, enable_double_dqn=True, enable_dueling_network=False,
                  dueling_type='avg', *args, **kwargs):
         super(DQNAgent, self).__init__(*args, **kwargs)
 
@@ -154,6 +154,7 @@ class DQNAgent(AbstractDQNAgent):
             test_policy = GreedyQPolicy()
         self.policy = policy
         self.test_policy = test_policy
+        self.start_policy = start_policy
 
         # State.
         self.reset_states()
@@ -234,11 +235,14 @@ class DQNAgent(AbstractDQNAgent):
     def forward(self, observation):
         # Select an action.
         state = self.memory.get_recent_state(observation)
-        q_values = self.compute_q_values(state)
-        if self.training:
-            action = self.policy.select_action(q_values=q_values)
+        if self.step < self.nb_steps_warmup and self.start_policy:
+            action = self.start_policy.select_action(state)
         else:
-            action = self.test_policy.select_action(q_values=q_values)
+            q_values = self.compute_q_values(state)
+            if self.training:
+                action = self.policy.select_action(q_values=q_values)
+            else:
+                action = self.test_policy.select_action(q_values=q_values)
 
         # Book-keeping.
         self.recent_observation = observation
@@ -250,6 +254,7 @@ class DQNAgent(AbstractDQNAgent):
         # Store most recent experience in memory.
         if self.step % self.memory_interval == 0:
             assert len(self.recent_observation) == 3
+            # print('recent action',self.recent_action)
 
             self.memory.append(self.recent_observation, self.recent_action, reward, terminal,
                                training=self.training)
@@ -332,36 +337,38 @@ class DQNAgent(AbstractDQNAgent):
             Rs = reward_batch.reshape(-1,1) + discounted_reward_batch # (batch_size * nb_agemts)
             assert Rs.shape == (self.batch_size, self.nb_agents)
 
-            # print(state0_batch)
+            # num_rl_cars = 0
             for idx, (target, mask, R, action, state) in enumerate(zip(targets, masks, Rs, action_batch, state0_batch[-1])):
-                # print(state)
-                rl_indices = state.astype(bool)
-                if not rl_indices.all():
-                    continue
-                # print(rl_indices)
-                action = action[rl_indices]
-                # print(action)
 
-                target[rl_indices, action] = R[action].reshape(1,-1)  # update action with estimated accumulated reward
-                dummy_targets[idx] = R.reshape(1,-1)
-                mask[rl_indices, action] = 1.  # enable loss for this specific action
+                rl_indices = state.astype(bool)
+
+                if rl_indices.any():
+                    # print("with rl cars")
+                    # print(action)
+                    # num_rl_cars += rl_indices.sum()
+                    # print(rl_indices)
+
+                    target[rl_indices, action] = R[action].reshape(1,-1)  # update action with estimated accumulated reward
+                    dummy_targets[idx] = R.reshape(1,-1)
+                    mask[rl_indices, action] = 1.  # enable loss for this specific action
             targets = np.array(targets).astype('float32')
             masks = np.array(masks).astype('float32')
+            # print('sum_mask',np.sum(masks))
+            # print('num_rl',num_rl_cars)
+
 
             # Finally, perform a single update on the entire batch. We use a dummy target since
             # the actual loss is computed in a Lambda layer that needs more complex input. However,
             # it is still useful to know the actual target to compute metrics properly.
             ins = [state0_batch] if type(self.model.input) is not list else state0_batch
             metrics = self.trainable_model.train_on_batch(ins + [targets, masks], [dummy_targets, targets])
-            # print('here',metrics)
 
             metrics = [metric for idx, metric in enumerate(metrics) if idx not in (1, 2)]  # throw away individual losses
 
             metrics += self.policy.metrics
             if self.processor is not None:
                 metrics += self.processor.metrics
-            # print()
-            # break
+
         if self.target_model_update >= 1 and self.step % self.target_model_update == 0:
             self.update_target_model_hard()
 

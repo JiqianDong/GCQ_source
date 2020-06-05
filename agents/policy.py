@@ -47,10 +47,11 @@ class greedy_q_policy(Policy):
 class random_obs_policy(Policy):
     def select_action(self,observation):
         action = None
-        _,_,mask = observation
+        _,_,mask = observation[0]
         num_agent = mask.sum().astype(int)
         if num_agent>0:
             action = np.random.choice(np.arange(3),num_agent)
+        # print('random action: ',action)
         return action
 
 class eps_greedy_q_policy(Policy):
@@ -67,4 +68,5 @@ class eps_greedy_q_policy(Policy):
                 action = np.random.choice(np.arange(3),num_agent)
             else:
                 action = q_values[mask,:].argmax(1)
+        # print('action: ',action)
         return action

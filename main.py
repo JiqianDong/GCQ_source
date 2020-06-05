@@ -10,8 +10,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-TEST_SETTINGS = True
-# TEST_SETTINGS = False
+# TEST_SETTINGS = True
+TEST_SETTINGS = False
 DEBUG = True
 
 TRAINING = True
@@ -124,7 +124,7 @@ flow_params = dict(
     initial=initial_config
 )
 # # number of time steps
-flow_params['env'].horizon = 8000
+flow_params['env'].horizon = 3000
 
 
 ############ EXPERIMENTS ##############

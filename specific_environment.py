@@ -134,10 +134,11 @@ class MergeEnv(Env):
         if isinstance(rl_actions,np.ndarray):
             # print(rl_actions.shape)
             # rl_actions = rl_actions.reshape((self.net_params.additional_params['num_cav'],3))
-            rl_actions -=1
+            rl_actions2 = rl_actions.copy()
+            rl_actions2 -= 1
             rl_ids = self.observed_cavs
 
-            self.k.vehicle.apply_lane_change(rl_ids, rl_actions,2)
+            self.k.vehicle.apply_lane_change(rl_ids, rl_actions2, 2)
         return None
 
     def check_full_fill(self):
