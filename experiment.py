@@ -111,7 +111,8 @@ class Experiment:
                 rl_ids = self.env.k.vehicle.get_rl_ids()
                 if rl_ids:
                     if (self.env.time_counter-self.env.env_params.warmup_steps)%100 == 99:
-                        print('lane change')
+                    # if (self.env.time_counter-self.env.env_params.warmup_steps)%30 == 0:
+                        # print('lane change')
                         return np.random.choice(3,len(rl_ids))
                         # return np.zeros(len(rl_ids))
                     else:

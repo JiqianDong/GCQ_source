@@ -189,6 +189,9 @@ class Env(gym.Env):
         # store the observed vehicles when get states
         self.observed_cavs = None
 
+        # store the drastic lane changing vehicles at each timestep
+        self.drastic_veh_id = None
+
         # store the initial state of the vehicles kernel (needed for restarting
         # the simulation)
         self.k.vehicle.kernel_api = None
@@ -359,7 +362,6 @@ class Env(gym.Env):
             # network, including RL and SUMO-controlled vehicles
             routing_ids = []
             routing_actions = []
-
             changing_color_list = []
 
             for veh_id in self.k.vehicle.get_ids():

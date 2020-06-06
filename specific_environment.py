@@ -90,14 +90,16 @@ class MergeEnv(Env):
             # construct the mask
             mask[num_hv:num_hv+len(rl_ids)] = np.ones(len(rl_ids))
 
-            # print(adjacency)
-            # print(states)
-            # print(mask)
             self.observed_cavs = rl_ids
 
         return states, adjacency, mask
 
     def compute_reward(self,rl_actions,**kwargs):
+        w_intention = 4
+        w_p_lane_change = 1
+        w_p_crash = 1
+
+
         unit = 1
         # reward for system speed
         # all_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
@@ -109,26 +111,22 @@ class MergeEnv(Env):
         #     print('current num_half_filled: ',kwargs['num_half_filled'])
 
 
-        # penalty for drastic lane changing behavors
-        # total_lane_change_penalty = 0
-        # for veh_id in rl_veh_ids:
-        #     if self.time_counter - self.k.vehicle.get_last_lc(veh_id)<20:
-        #         print("drastic change",veh_id)
-        #         print(self.time_counter)
-        #         print(self.k.vehicle.get_last_lc(veh_id))
-        #         # time.sleep(1)
-        #         total_lane_change_penalty -= unit
+        # penalty for frequent lane changing behavors
+        drastic_lane_change_penalty = 0
+        if self.drastic_veh_id:
+            drastic_lane_change_penalty += len(self.drastic_veh_id) * unit
+
 
         # penalty for crashing
         total_crash_penalty = 0
         crash_ids = kwargs["fail"]
         total_crash_penalty = len(crash_ids) * unit
         # if crash_ids:
-        #     # time.sleep(1)
         #     print(crash_ids,total_crash_penalty)
 
-
-        return intention_reward - total_crash_penalty
+        return w_intention*intention_reward - \
+                w_p_lane_change*total_crash_penalty - \
+                w_p_crash*drastic_lane_change_penalty
 
     def apply_rl_actions(self, rl_actions=None):
         if isinstance(rl_actions,np.ndarray):
@@ -137,8 +135,16 @@ class MergeEnv(Env):
             rl_actions2 = rl_actions.copy()
             rl_actions2 -= 1
             rl_ids = self.observed_cavs
+            drastic_veh = []
+            for ind,veh_id in enumerate(rl_ids):
+                if rl_actions2[ind]!=0 and (self.time_counter - self.k.vehicle.get_last_lc(veh_id)<50):
+                # if rl_actions2[ind]!=0:
+                    # print(self.time_counter - self.k.vehicle.get_last_lc(veh_id))
+                    drastic_veh.append(veh_id)
+                    # print("drastic lane change: ", veh_id)
 
-            self.k.vehicle.apply_lane_change(rl_ids, rl_actions2, 2)
+            self.drastic_veh_id = drastic_veh
+            self.k.vehicle.apply_lane_change(rl_ids, rl_actions2, 200)
         return None
 
     def check_full_fill(self):
