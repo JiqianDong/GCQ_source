@@ -10,13 +10,14 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-TEST_SETTINGS = True
-# TEST_SETTINGS = False
-DEBUG = True
-# DEBUG = False
+# TEST_SETTINGS = True
+TEST_SETTINGS = False
 
-TRAINING = True
-# TRAINING = False
+# DEBUG = True
+DEBUG = False
+
+# TRAINING = True
+TRAINING = False
 
 
 # RENDER = False

@@ -235,14 +235,17 @@ class DQNAgent(AbstractDQNAgent):
     def forward(self, observation):
         # Select an action.
         state = self.memory.get_recent_state(observation)
-        if self.step < self.nb_steps_warmup and self.start_policy:
-            action = self.start_policy.select_action(state)
-        else:
-            q_values = self.compute_q_values(state)
-            if self.training:
-                action = self.policy.select_action(q_values=q_values)
+        if self.training:
+            if self.step < self.nb_steps_warmup and self.start_policy:
+                action = self.start_policy.select_action(state)
             else:
-                action = self.test_policy.select_action(q_values=q_values)
+                q_values = self.compute_q_values(state)
+                action = self.policy.select_action(q_values=q_values)
+        else:
+
+            q_values = self.compute_q_values(state)
+            print(q_values)
+            action = self.test_policy.select_action(q_values=q_values)
 
         # Book-keeping.
         self.recent_observation = observation

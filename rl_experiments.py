@@ -144,7 +144,7 @@ class Experiment:
 
         my_dqn = DQNAgent(processor= multi_input_processor,
                           model = rl_model.base_model,
-                          policy = eps_greedy_q_policy(),
+                          policy = eps_greedy_q_policy(0.2),
                           test_policy = greedy_q_policy(),
                           start_policy = random_obs_policy(),
                           nb_total_agents = N,
@@ -154,7 +154,7 @@ class Experiment:
                           batch_size=batch_size,
                           custom_model_objects={'GraphConv': GraphConv})
 
-        my_dqn.compile(Adam(0.001))
+        my_dqn.compile(Adam(0.0001))
 
         if training:
             from agents.rl_lib.callbacks import FileLogger

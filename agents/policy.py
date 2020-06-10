@@ -40,8 +40,10 @@ class greedy_q_policy(Policy):
     def select_action(self,q_values):
         action = None
         mask = np.any(q_values, axis=1)
+        # print(q_values)
         if mask.sum() > 0:
             action = q_values[mask,:].argmax(1)
+        # print(action)
         return action
 
 class random_obs_policy(Policy):

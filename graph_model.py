@@ -21,7 +21,6 @@ class GraphicPolicy(TFModelV2):
         x = GraphConv(32, activation='relu',name='gcn1')([X_in, A_in])
         x = GraphConv(32, activation='relu',name='gcn2')([x, A_in])
 
-
         ### Policy network
 
         x1 = Dense(32,activation='relu',name='policy_1')(x)
@@ -118,6 +117,9 @@ class GraphicQNetworkKeras():
 
         ### Policy network
         x1 = Dense(32,activation='relu',name='policy_1')(x)
+
+        x1 = Dense(32,activation='relu',name='policy_add')(x1)
+
         x2 = Dense(16,activation='relu',name='policy_2')(x1)
 
         ###  Action and filter
