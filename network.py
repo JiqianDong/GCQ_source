@@ -16,9 +16,9 @@ ADDITIONAL_NET_PARAMS = {
     "on_ramps_lanes": 1,
     "off_ramps_lanes": 1,
     # speed limit on highway, on-ramps and off-ramps respectively
-    "highway_speed": 5,
-    "on_ramps_speed": 3,
-    "off_ramps_speed": 3,
+    "highway_speed": 10,
+    "on_ramps_speed": 7,
+    "off_ramps_speed": 7,
     # positions of the on-ramps
     "on_ramps_pos": [],
     # positions of the off-ramps

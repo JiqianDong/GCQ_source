@@ -41,10 +41,14 @@ class MergeEnv(Env):
 
         ids = self.k.vehicle.get_ids()
         rl_ids = self.k.vehicle.get_rl_ids()
+
+        # filter the ones on the ramps
+        rl_ids = [id_ for id_ in rl_ids if not self.k.vehicle.get_edge(id_).startswith('off_ramp')]
+
+
         human_ids = self.k.vehicle.get_human_ids()
 
         # assert len(ids) != len(human_ids) + len(rl_ids)
-
 
         states = np.zeros([N,3+num_lanes+self.n_unique_intentions])
         adjacency = np.zeros([N,N])
@@ -91,18 +95,27 @@ class MergeEnv(Env):
             mask[num_hv:num_hv+len(rl_ids)] = np.ones(len(rl_ids))
 
             self.observed_cavs = rl_ids
+            self.observed_all_vehs = ids
 
         return states, adjacency, mask
 
     def compute_reward(self,rl_actions,**kwargs):
-        w_intention = 2
+        w_intention = 100
+        w_speed = 1
         w_p_lane_change = 0.1
         w_p_crash = 0.5
 
 
         unit = 1
-        # reward for system speed
-        # all_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+
+        # reward for system speed: mean(speed/max_speed) for every vehicle
+        speed_reward = 0
+        if self.observed_all_vehs:
+            all_speed = np.array(self.k.vehicle.get_speed(self.observed_all_vehs))
+            max_speed = np.array([self.env_params.additional_params['max_hv_speed']]*(len(self.observed_all_vehs) - len(self.observed_cavs))\
+                                +[self.env_params.additional_params['max_cav_speed']]*len(self.observed_cavs))
+            speed_reward = np.mean(all_speed/max_speed)
+        # print(speed_reward)
 
         # reward for satisfying intention ---- only a big instant reward
         intention_reward = kwargs['num_full_filled'] * unit + kwargs['num_half_filled'] * unit * 0.5
@@ -124,9 +137,10 @@ class MergeEnv(Env):
         # if crash_ids:
         #     print(crash_ids,total_crash_penalty)
 
-        return w_intention*intention_reward - \
-                w_p_lane_change*total_crash_penalty - \
-                w_p_crash*drastic_lane_change_penalty
+        return  w_speed * speed_reward + \
+                w_intention * intention_reward - \
+                w_p_lane_change * total_crash_penalty - \
+                w_p_crash * drastic_lane_change_penalty
 
     def apply_rl_actions(self, rl_actions=None):
         if isinstance(rl_actions,np.ndarray):
@@ -138,8 +152,6 @@ class MergeEnv(Env):
             drastic_veh = []
             for ind,veh_id in enumerate(rl_ids):
                 if rl_actions2[ind]!=0 and (self.time_counter - self.k.vehicle.get_last_lc(veh_id)<50):
-                # if rl_actions2[ind]!=0:
-                    # print(self.time_counter - self.k.vehicle.get_last_lc(veh_id))
                     drastic_veh.append(veh_id)
                     # print("drastic lane change: ", veh_id)
 

@@ -188,6 +188,7 @@ class Env(gym.Env):
 
         # store the observed vehicles when get states
         self.observed_cavs = None
+        self.observed_all_vehs = None
 
         # store the drastic lane changing vehicles at each timestep
         self.drastic_veh_id = None

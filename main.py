@@ -1,7 +1,7 @@
-from flow.core.params import VehicleParams,InFlows
+from flow.core.params import VehicleParams,InFlows,SumoCarFollowingParams,SumoParams, EnvParams, InitialConfig, NetParams, SumoLaneChangeParams
 from flow.controllers import IDMController, RLController
 from controller import SpecificMergeRouter,NearestMergeRouter
-from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, SumoLaneChangeParams
+# from flow.core.params import
 
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
@@ -10,8 +10,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-# TEST_SETTINGS = True
-TEST_SETTINGS = False
+TEST_SETTINGS = True
+# TEST_SETTINGS = False
 
 # DEBUG = True
 DEBUG = False
@@ -33,6 +33,8 @@ NUM_HUMAN = 20
 NUM_MERGE_0 = 10
 NUM_MERGE_1 = 10
 
+MAX_CAV_SPEED = 12
+MAX_HV_SPEED = 8
 
 
 VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
@@ -47,18 +49,21 @@ Router = NearestMergeRouter if NEAREST_MERGE else SpecificMergeRouter
 vehicles = VehicleParams()
 vehicles.add(veh_id="human",
              lane_change_params = SumoLaneChangeParams('strategic'),
+             car_following_params = SumoCarFollowingParams(speed_mode='right_of_way',min_gap=0.0, tau=0.5, max_speed=MAX_HV_SPEED),
              acceleration_controller=(IDMController, {}),
              routing_controller = (Router,{}),
              )
 
 vehicles.add(veh_id="merge_0",
              lane_change_params = SumoLaneChangeParams('aggressive'),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[0])
 
 vehicles.add(veh_id="merge_1",
              lane_change_params = SumoLaneChangeParams('aggressive'),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[1])
@@ -91,17 +96,16 @@ inflow.add(veh_type="merge_1",
 
 sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER)
 
-# sim_params = SumoParams(sim_step=0.1, render=False)
-
-
-
 
 from specific_environment import MergeEnv
 
 intention_dic = {"human":0,"merge_0":1,"merge_1":1} if NEAREST_MERGE else {"human":0,"merge_0":1,"merge_1":2}
 terminal_edges = ['off_ramp_0','off_ramp_1','highway_2']
 
-env_params = EnvParams(warmup_steps=50,additional_params={"intention":intention_dic})
+env_params = EnvParams(warmup_steps=50,
+                       additional_params={"intention":intention_dic,
+                                          "max_cav_speed":MAX_CAV_SPEED,
+                                          "max_hv_speed":MAX_HV_SPEED})
 
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
 additional_net_params['num_vehicles'] = NUM_HUMAN + NUM_MERGE_0 + NUM_MERGE_1
