@@ -110,10 +110,14 @@ class GraphicQNetworkKeras():
         A_in = Input(shape=(N,N), name='A_in')
         RL_indice = Input(shape=(N), name='rl_indice_in')
 
+        ### Encoder
+        x = Dense(32,activation='relu',name='encoder_1')(X_in)
+        x = Dense(32,activation='relu',name='encoder_2')(x)
+
         ### Graphic convolution
 
-        x = GraphConv(32, activation='relu',name='gcn1')([X_in, A_in])
-        x = GraphConv(32, activation='relu',name='gcn2')([x, A_in])
+        x = GraphConv(32, activation='relu',name='gcn1')([x, A_in])
+        # x = GraphConv(32, activation='relu',name='gcn2')([x, A_in])
 
         ### Policy network
         x1 = Dense(32,activation='relu',name='policy_1')(x)
@@ -123,7 +127,7 @@ class GraphicQNetworkKeras():
         x2 = Dense(16,activation='relu',name='policy_2')(x1)
 
         ###  Action and filter
-        x3 = Dense(num_outputs, activation='linear',name='policy_3')(x2)
+        x3 = Dense( num_outputs, activation='linear',name='policy_3')(x2)
         filt = Reshape((N,1),name='expend_dim')(RL_indice)
         qout = Multiply(name='filter')([x3,filt])
 
