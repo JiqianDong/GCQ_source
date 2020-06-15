@@ -13,8 +13,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 # TEST_SETTINGS = True
 TEST_SETTINGS = False
 
-DEBUG = True
-# DEBUG = False
+# DEBUG = True
+DEBUG = False
 
 TRAINING = True
 # TRAINING = False
