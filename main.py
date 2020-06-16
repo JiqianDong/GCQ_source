@@ -49,7 +49,7 @@ Router = NearestMergeRouter if NEAREST_MERGE else SpecificMergeRouter
 vehicles = VehicleParams()
 vehicles.add(veh_id="human",
              lane_change_params = SumoLaneChangeParams('strategic'),
-             car_following_params = SumoCarFollowingParams(speed_mode='right_of_way',min_gap=0.0, tau=0.5, max_speed=MAX_HV_SPEED),
+             car_following_params = SumoCarFollowingParams(speed_mode='right_of_way',min_gap=5, tau=0.5, max_speed=MAX_HV_SPEED),
              acceleration_controller=(IDMController, {}),
              routing_controller = (Router,{}),
              )
@@ -76,6 +76,7 @@ inflow.add(veh_type="human",
            edge="highway_0",
            probability=0.2,
            depart_lane='random',
+           depart_speed = 'random',
            route = 'highway_0',
            number = NUM_HUMAN)
 
@@ -83,6 +84,7 @@ inflow.add(veh_type="merge_0",
            edge="highway_0",
            probability = 0.1,
            depart_lane='random',
+           depart_speed = 'random',
            route = 'highway_0',
            number = NUM_MERGE_0)
 
@@ -90,11 +92,12 @@ inflow.add(veh_type="merge_1",
            edge="highway_0",
            probability = 0.1,
            depart_lane='random',
+           depart_speed = 'random',
            route = 'highway_0',
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER)
+sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER, seed=2)
 
 
 from specific_environment import MergeEnv
