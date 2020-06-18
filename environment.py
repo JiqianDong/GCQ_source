@@ -177,7 +177,7 @@ class Env(gym.Env):
 
         # store the initial vehicle ids
         self.initial_ids = deepcopy(self.network.vehicles.ids)
-        print(self.initial_ids)
+        # print(self.initial_ids)
 
         # store the intention dict
         self.intention_dict =  self.env_params.additional_params['intention']

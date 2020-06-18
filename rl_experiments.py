@@ -98,7 +98,7 @@ class Experiment:
         else:
             nb_steps_warmup = 500000
             batch_size = 32
-            total_steps = 1000000
+            total_steps = 1500000
             log_interval = 1000
             nb_max_episode_steps = 3000
 
@@ -136,7 +136,7 @@ class Experiment:
         from tensorflow.keras.optimizers import Adam
         import tensorflow as tf
 
-        memory_buffer = CustomerSequentialMemory(limit=5000, window_length=1)
+        memory_buffer = CustomerSequentialMemory(limit=500000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
 
         rl_model = GraphicQNetworkKeras(N,F,obs_space,act_space)
