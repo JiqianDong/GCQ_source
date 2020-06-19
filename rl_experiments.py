@@ -95,12 +95,14 @@ class Experiment:
             total_steps = 200
             log_interval = 40
             nb_max_episode_steps = 20
+            gamma = 0.99
         else:
             nb_steps_warmup = 500000
             batch_size = 32
             total_steps = 1500000
             log_interval = 1000
             nb_max_episode_steps = 3000
+            gamma = 1.0
 
 
         logdir = "./logs/" + model_name
@@ -152,6 +154,7 @@ class Experiment:
                           memory = memory_buffer,
                           nb_steps_warmup=nb_steps_warmup,
                           batch_size=batch_size,
+                          gamma = gamma,
                           custom_model_objects={'GraphConv': GraphConv})
 
         my_dqn.compile(Adam(0.0001))

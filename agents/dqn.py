@@ -5,7 +5,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Lambda, Input, Layer, Dense
 
-from .rl_lib.core import Agent
+from .
 from .rl_lib.policy import EpsGreedyQPolicy, GreedyQPolicy
 from .rl_lib.util import *
 from spektral.layers import GraphConv
@@ -244,7 +244,7 @@ class DQNAgent(AbstractDQNAgent):
         else:
 
             q_values = self.compute_q_values(state)
-            # print(q_values)
+            print(q_values)
             action = self.test_policy.select_action(q_values=q_values)
 
         # Book-keeping.

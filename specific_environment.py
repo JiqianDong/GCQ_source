@@ -100,9 +100,9 @@ class MergeEnv(Env):
         return states, adjacency, mask
 
     def compute_reward(self,rl_actions,**kwargs):
-        w_intention = 1
+        w_intention = 10
         w_speed = 0.001
-        w_p_lane_change = 0.001
+        w_p_lane_change = 0.0
         w_p_crash = 0.01
 
 
