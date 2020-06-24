@@ -13,8 +13,10 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 # TEST_SETTINGS = True
 TEST_SETTINGS = False
 
-# DEBUG = True
-DEBUG = False
+
+
+DEBUG = True
+# DEBUG = False
 
 TRAINING = True
 # TRAINING = False
@@ -26,6 +28,11 @@ RENDER = False
 
 NEAREST_MERGE = False
 # NEAREST_MERGE = True
+
+
+MODEL = 'lstm'
+# MODEL = 'gcn'
+
 
 RAY_RL = False
 
@@ -156,6 +163,7 @@ else:
     exp.run(num_runs=1,training=TRAINING, \
             num_human=NUM_HUMAN, \
             num_cav=(NUM_MERGE_0+NUM_MERGE_1),\
+            model=MODEL,
             debug=DEBUG)
 
 

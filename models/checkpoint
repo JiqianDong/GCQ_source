@@ -1,2 +1,2 @@
-model_checkpoint_path: "dqn_hv_20_cav_20.h5f"
-all_model_checkpoint_paths: "dqn_hv_20_cav_20.h5f"
+model_checkpoint_path: "dqn_lstmhv_20_cav_20.h5f"
+all_model_checkpoint_paths: "dqn_lstmhv_20_cav_20.h5f"

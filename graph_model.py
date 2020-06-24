@@ -1,5 +1,5 @@
 from spektral.layers import GraphConv
-from tensorflow.keras.layers import Input, Dense, Lambda, Multiply, Reshape, Flatten
+from tensorflow.keras.layers import Input, Dense, Lambda, Multiply, Reshape, Flatten, Masking, LSTM
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.regularizers import l2
@@ -14,7 +14,7 @@ class GraphicPolicy(TFModelV2):
     def build_model(self,N,F,num_outputs):
         X_in = Input(shape=(N,F), name='X_in')
         A_in = Input(shape=(N,N), name='A_in')
-        RL_indice = Input(shape=(N), name='mask')
+        RL_indice = Input(shape=(N), name='rl_indice_in')
 
         ### Graphic convolution
 
@@ -63,7 +63,7 @@ class GraphicPolicyKeras():
     def build_model(self,N,F,num_outputs):
         X_in = Input(shape=(N,F), name='X_in')
         A_in = Input(shape=(N,N), name='A_in')
-        RL_indice = Input(shape=(N), name='mask')
+        RL_indice = Input(shape=(N), name='rl_indice_in')
 
         ### Graphic convolution
 
@@ -123,7 +123,6 @@ class GraphicQNetworkKeras():
         x1 = Dense(32,activation='relu',name='policy_1')(x)
 
         x1 = Dense(32,activation='relu',name='policy_add')(x1)
-
         x2 = Dense(16,activation='relu',name='policy_2')(x1)
 
         ###  Action and filter
@@ -136,4 +135,38 @@ class GraphicQNetworkKeras():
         return model
 
 
+class LstmQNetworkKeras():
+    def __init__(self, N,F, obs_space, action_space, num_outputs=3, model_config=None, name='graphic_policy_keras'):
+        self.obs_space = obs_space
+        self.action_space = action_space
+        self.num_outputs = num_outputs
+        self.name = name
+        self.base_model = self.build_model(N,F,num_outputs)
 
+    def build_model(self,N,F,num_outputs):
+
+        X_in = Input(shape=(N,F), name='X_in')
+        A_in = Input(shape=(N,N), name='A_in')
+        x = Dense(32,activation='relu',name='encoder_1')(X_in)
+        x = Dense(32,activation='relu',name='encoder_2')(x)
+
+        RL_indice = Input(shape=(N), name='rl_indice_in')
+
+
+        x = Masking(mask_value=0,input_shape=(N,32))(x)
+
+        ### LSTM fusion
+        x = LSTM(32,return_sequences=True)(x)
+
+        ### Policy network
+        x1 = Dense(32,activation='relu',name='policy_1')(x)
+        x2 = Dense(16,activation='relu',name='policy_2')(x1)
+
+        ###  Action and filter
+        x3 = Dense(num_outputs, activation='linear',name='policy_3')(x2)
+        mask = Reshape((N,1),name='expend_dim')(RL_indice)
+        qout = Multiply(name='filter')([x3,mask])
+
+        model = Model(inputs = [X_in,A_in,RL_indice], outputs=[qout])
+        print(model.summary())
+        return model

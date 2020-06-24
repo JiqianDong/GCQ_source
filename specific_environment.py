@@ -44,9 +44,9 @@ class MergeEnv(Env):
 
         # filter the ones on the ramps
         rl_ids = [id_ for id_ in rl_ids if not self.k.vehicle.get_edge(id_).startswith('off_ramp')]
+        rl_ids = sorted(rl_ids)
 
-
-        human_ids = self.k.vehicle.get_human_ids()
+        human_ids = sorted(self.k.vehicle.get_human_ids())
 
         # assert len(ids) != len(human_ids) + len(rl_ids)
 
@@ -101,10 +101,9 @@ class MergeEnv(Env):
 
     def compute_reward(self,rl_actions,**kwargs):
         w_intention = 10
-        w_speed = 0.001
-        w_p_lane_change = 0.0
+        w_speed = 0.01
+        w_p_lane_change = 0.001
         w_p_crash = 0.01
-
 
         unit = 1
 

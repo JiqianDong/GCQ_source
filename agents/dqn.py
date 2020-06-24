@@ -5,7 +5,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Lambda, Input, Layer, Dense
 
-from .
+from .rl_lib.core import Agent
 from .rl_lib.policy import EpsGreedyQPolicy, GreedyQPolicy
 from .rl_lib.util import *
 from spektral.layers import GraphConv

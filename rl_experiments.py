@@ -86,8 +86,8 @@ class Experiment:
         logging.info("Initializing environment.")
 
 
-    def run(self,num_runs,training,num_human,num_cav,debug):
-        model_name = 'hv_'+str(num_human)+'_cav_'+str(num_cav)
+    def run(self,num_runs,training,num_human,num_cav, model, debug):
+        model_name = model+'hv_'+str(num_human)+'_cav_'+str(num_cav)
 
         if debug:
             nb_steps_warmup = 30
@@ -129,7 +129,7 @@ class Experiment:
         obs_space = Dict({'states':states,'adjacency':adjacency,'mask':mask})
         act_space = Box(low=0, high=1, shape = (N,), dtype=np.int32)
 
-        from graph_model import GraphicQNetworkKeras
+        from graph_model import GraphicQNetworkKeras, LstmQNetworkKeras
         from agents.memory import CustomerSequentialMemory
         from agents.processor import Jiqian_MultiInputProcessor
         from agents.dqn import DQNAgent
@@ -141,7 +141,13 @@ class Experiment:
         memory_buffer = CustomerSequentialMemory(limit=500000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
 
-        rl_model = GraphicQNetworkKeras(N,F,obs_space,act_space)
+
+        if model=='gcn':
+            rl_model = GraphicQNetworkKeras(N,F,obs_space,act_space)
+        elif model == 'lstm':
+            rl_model = LstmQNetworkKeras(N,F,obs_space,act_space)
+        else:
+            raise NotImplementedError
 
 
         my_dqn = DQNAgent(processor= multi_input_processor,
