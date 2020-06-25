@@ -87,7 +87,7 @@ class Experiment:
 
 
     def run(self,num_runs,training,num_human,num_cav, model, debug):
-        model_name = model+'hv_'+str(num_human)+'_cav_'+str(num_cav)
+        model_name = model+'_hv_'+str(num_human)+'_cav_'+str(num_cav)
 
         if debug:
             nb_steps_warmup = 30
@@ -105,10 +105,10 @@ class Experiment:
             gamma = 1.0
 
 
-        logdir = "./logs/" + model_name
-        history_file = "./logs/training_hist.txt"
+        logdir = "./logs/"
+        history_file = "./logs/" + model_name + '_training_hist.txt'
         try:
-            os.rmdir(logdir)
+            # os.rmdir(logdir)
             os.remove(history_file)
 
         except:
@@ -177,7 +177,8 @@ class Experiment:
 
             from generate_training_plots import plot_training
 
-            plot_training(history_file)
+
+            plot_training(logdir)
 
         else:
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))

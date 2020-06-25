@@ -30,8 +30,8 @@ NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-MODEL = 'lstm'
-# MODEL = 'gcn'
+# MODEL = 'lstm'
+MODEL = 'gcn'
 
 
 RAY_RL = False
