@@ -41,7 +41,7 @@ NUM_MERGE_0 = 10
 NUM_MERGE_1 = 10
 
 MAX_CAV_SPEED = 12
-MAX_HV_SPEED = 8
+MAX_HV_SPEED = 6
 
 
 VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
