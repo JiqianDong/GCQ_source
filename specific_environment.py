@@ -102,17 +102,21 @@ class MergeEnv(Env):
     def compute_reward(self,rl_actions,**kwargs):
         w_intention = 10
         w_speed = 0.01
-        w_p_lane_change = 0.001
+        w_p_lane_change = 0.0
         w_p_crash = 0.01
 
         unit = 1
 
         # reward for system speed: mean(speed/max_speed) for every vehicle
         speed_reward = 0
-        if self.observed_all_vehs:
-            all_speed = np.array(self.k.vehicle.get_speed(self.observed_all_vehs))
-            max_speed = np.array([self.env_params.additional_params['max_hv_speed']]*(len(self.observed_all_vehs) - len(self.observed_cavs))\
-                                +[self.env_params.additional_params['max_cav_speed']]*len(self.observed_cavs))
+        # if self.observed_all_vehs:
+        if self.observed_cavs:
+            # all_speed = np.array(self.k.vehicle.get_speed(self.observed_all_vehs))
+            # max_speed = np.array([self.env_params.additional_params['max_hv_speed']]*(len(self.observed_all_vehs) - len(self.observed_cavs))\
+            #                     +[self.env_params.additional_params['max_cav_speed']]*len(self.observed_cavs))
+
+            all_speed = np.array(self.k.vehicle.get_speed(np.observed_cavs))
+            max_speed = self.env_params.additional_params['max_cav_speed']
             speed_reward = np.mean(all_speed/max_speed)
         # print(speed_reward)
 
@@ -121,7 +125,6 @@ class MergeEnv(Env):
         # if intention_reward>0:
         #     print('current num_full_filled: ',kwargs['num_full_filled'])
         #     print('current num_half_filled: ',kwargs['num_half_filled'])
-
 
         # penalty for frequent lane changing behavors
         drastic_lane_change_penalty = 0
