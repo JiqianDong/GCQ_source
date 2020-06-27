@@ -100,31 +100,49 @@ class MergeEnv(Env):
         return states, adjacency, mask
 
     def compute_reward(self,rl_actions,**kwargs):
-        w_intention = 10
-        w_speed = 0.01
-        w_p_lane_change = 0.0
-        w_p_crash = 0.01
+        # w_intention = 10
+        w_intention = 1
+        w_speed = 1
+        w_p_lane_change = 1
+        w_p_crash = 5
 
         unit = 1
 
         # reward for system speed: mean(speed/max_speed) for every vehicle
         speed_reward = 0
-        # if self.observed_all_vehs:
+        intention_reward = 0
+
         if self.observed_cavs:
             # all_speed = np.array(self.k.vehicle.get_speed(self.observed_all_vehs))
             # max_speed = np.array([self.env_params.additional_params['max_hv_speed']]*(len(self.observed_all_vehs) - len(self.observed_cavs))\
             #                     +[self.env_params.additional_params['max_cav_speed']]*len(self.observed_cavs))
 
-            all_speed = np.array(self.k.vehicle.get_speed(np.observed_cavs))
+            all_speed = np.array(self.k.vehicle.get_speed(self.observed_cavs))
             max_speed = self.env_params.additional_params['max_cav_speed']
             speed_reward = np.mean(all_speed/max_speed)
-        # print(speed_reward)
+            # print(speed_reward)
 
-        # reward for satisfying intention ---- only a big instant reward
-        intention_reward = kwargs['num_full_filled'] * unit + kwargs['num_half_filled'] * unit * 0.5
-        # if intention_reward>0:
-        #     print('current num_full_filled: ',kwargs['num_full_filled'])
-        #     print('current num_half_filled: ',kwargs['num_half_filled'])
+        ###### reward for satisfying intention ---- only a big instant reward
+        # intention_reward = kwargs['num_full_filled'] * unit + kwargs['num_half_filled'] * unit * 0.5
+
+            for cav_id in self.observed_cavs:
+                cav_lane = self.k.vehicle.get_lane(cav_id)
+
+                # print(cav_id,x,cav_lane)
+                if cav_lane == 0:
+                    # print('here')
+                    x = self.k.vehicle.get_x_by_id(cav_id)
+                    cav_edge = self.k.vehicle.get_edge(cav_id)
+                    cav_type = self.k.vehicle.get_type(cav_id)
+                    # total_length = self.net_params.additional_params['highway_length']
+                    if (cav_type == 'merge_0' and cav_edge == 'highway_0'):
+                        val = (self.net_params.additional_params['off_ramps_pos'][0] - x)/self.net_params.additional_params['off_ramps_pos'][0]
+                        intention_reward += val
+                        # print('1: ',cav_id,val)
+                    elif (cav_type == 'merge_1' and cav_edge == 'highway_1'):
+                        val = (self.net_params.additional_params['off_ramps_pos'][1] - x)/(self.net_params.additional_params['off_ramps_pos'][1] - self.net_params.additional_params['off_ramps_pos'][0])
+                        intention_reward += val
+                        # print('2: ', cav_id, val)
 
         # penalty for frequent lane changing behavors
         drastic_lane_change_penalty = 0
@@ -139,6 +157,7 @@ class MergeEnv(Env):
         # if crash_ids:
         #     print(crash_ids,total_crash_penalty)
 
+        print(speed_reward,intention_reward,total_crash_penalty, drastic_lane_change_penalty)
         return  w_speed * speed_reward + \
                 w_intention * intention_reward - \
                 w_p_lane_change * total_crash_penalty - \
