@@ -97,22 +97,13 @@ class Experiment:
             nb_max_episode_steps = 20
             gamma = 0.99
         else:
-            nb_steps_warmup = 500000
+            nb_steps_warmup = 100000
             batch_size = 32
-            total_steps = 1500000
+            total_steps = 400000
             log_interval = 1000
-            nb_max_episode_steps = 3000
-            gamma = 1.0
+            nb_max_episode_steps = 2500
+            gamma = 0.99
 
-
-        logdir = "./logs/"
-        history_file = "./logs/" + model_name + '_training_hist.txt'
-        try:
-            # os.rmdir(logdir)
-            os.remove(history_file)
-
-        except:
-            pass
 
 
         F = 3 + self.env.net_params.additional_params['highway_lanes'] + self.env.n_unique_intentions # input feature size
@@ -166,6 +157,17 @@ class Experiment:
         my_dqn.compile(Adam(0.0001))
 
         if training:
+
+            logdir = "./logs/"
+            history_file = "./logs/" + model_name + '_training_hist.txt'
+            try:
+                # os.rmdir(logdir)
+                os.remove(history_file)
+
+            except:
+                pass
+
+
             from agents.rl_lib.callbacks import FileLogger
 
             # from tensorflow.python.keras.callbacks import TensorBoard

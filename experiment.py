@@ -113,9 +113,9 @@ class Experiment:
                     if (self.env.time_counter-self.env.env_params.warmup_steps)%100 == 99:
                     # if (self.env.time_counter-self.env.env_params.warmup_steps)%30 == 0:
                         # print('lane change')
-                        # return np.random.choice(3,len(rl_ids))
+                        return np.random.choice(3,len(rl_ids))
                         # return np.zeros(len(rl_ids))
-                        return np.ones(len(rl_ids))
+                        # return np.ones(len(rl_ids))
                     else:
                         return np.ones(len(rl_ids))
                 else:

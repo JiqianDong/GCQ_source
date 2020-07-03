@@ -101,10 +101,10 @@ class MergeEnv(Env):
 
     def compute_reward(self,rl_actions,**kwargs):
         # w_intention = 10
-        w_intention = 1
-        w_speed = 1
-        w_p_lane_change = 1
-        w_p_crash = 5
+        w_intention = 2
+        w_speed = 0.8
+        w_p_lane_change = 0.01
+        w_p_crash = 0.5
 
         unit = 1
 
@@ -143,6 +143,10 @@ class MergeEnv(Env):
                         val = (self.net_params.additional_params['off_ramps_pos'][1] - x)/(self.net_params.additional_params['off_ramps_pos'][1] - self.net_params.additional_params['off_ramps_pos'][0])
                         intention_reward += val
                         # print('2: ', cav_id, val)
+                    elif (cav_type == 'merge_1' and cav_edge == 'highway_0'):
+                        val = (self.net_params.additional_params['off_ramps_pos'][0] - x)/self.net_params.additional_params['off_ramps_pos'][0]
+                        intention_reward -= (1-val)
+                        # print('3: ', cav_id, (1-val))
 
         # penalty for frequent lane changing behavors
         drastic_lane_change_penalty = 0
@@ -157,7 +161,7 @@ class MergeEnv(Env):
         # if crash_ids:
         #     print(crash_ids,total_crash_penalty)
 
-        print(speed_reward,intention_reward,total_crash_penalty, drastic_lane_change_penalty)
+        # print(speed_reward,intention_reward,total_crash_penalty, drastic_lane_change_penalty)
         return  w_speed * speed_reward + \
                 w_intention * intention_reward - \
                 w_p_lane_change * total_crash_penalty - \

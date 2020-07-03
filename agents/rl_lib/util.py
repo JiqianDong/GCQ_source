@@ -62,6 +62,8 @@ def huber_loss(y_true, y_pred, clip_value):
     # https://medium.com/@karpathy/yes-you-should-understand-backprop-e2f06eab496b
     # for details.
     assert clip_value > 0.
+    # print(y_true.shape, y_pred.shape)
+    # assert y_true.shape == y_pred.shape
 
     x = y_true - y_pred
     if np.isinf(clip_value):
