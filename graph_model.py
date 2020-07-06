@@ -104,6 +104,7 @@ class GraphicQNetworkKeras():
         self.num_outputs = num_outputs
         self.name = name
         self.base_model = self.build_model(N,F,num_outputs)
+        print("new model")
 
     def build_model(self,N,F,num_outputs):
         X_in = Input(shape=(N,F), name='X_in')
@@ -121,7 +122,7 @@ class GraphicQNetworkKeras():
 
         ### Policy network
         x1 = Dense(32,activation='relu',name='policy_1')(x)
-
+        x1 = GraphConv(32, activation='relu',name='gcn2')([x1, A_in])
         x1 = Dense(32,activation='relu',name='policy_add')(x1)
         x2 = Dense(16,activation='relu',name='policy_2')(x1)
 

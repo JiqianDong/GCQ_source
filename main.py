@@ -15,22 +15,22 @@ TEST_SETTINGS = False
 
 
 
-DEBUG = True
-# DEBUG = False
+#DEBUG = True
+DEBUG = False
 
-TRAINING = True
-# TRAINING = False
+#TRAINING = True
+TRAINING = False
 
 
-RENDER = False
-# RENDER = True
+#RENDER = False
+RENDER = True
 
 
 NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-# MODEL = 'lstm'
+#MODEL = 'lstm'
 MODEL = 'gcn'
 
 
@@ -40,8 +40,8 @@ NUM_HUMAN = 20
 NUM_MERGE_0 = 10
 NUM_MERGE_1 = 10
 
-MAX_CAV_SPEED = 12
-MAX_HV_SPEED = 6
+MAX_CAV_SPEED = 14
+MAX_HV_SPEED = 10
 
 
 VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
@@ -104,7 +104,7 @@ inflow.add(veh_type="merge_1",
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER, seed=2)
+sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER)
 
 
 from specific_environment import MergeEnv
@@ -142,7 +142,7 @@ flow_params = dict(
     initial=initial_config
 )
 # # number of time steps
-flow_params['env'].horizon = 3000
+flow_params['env'].horizon = 2000
 
 
 ############ EXPERIMENTS ##############

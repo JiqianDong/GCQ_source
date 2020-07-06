@@ -97,9 +97,9 @@ class Experiment:
             nb_max_episode_steps = 20
             gamma = 0.99
         else:
-            nb_steps_warmup = 100000
+            nb_steps_warmup = 200000
             batch_size = 32
-            total_steps = 400000
+            total_steps = 800000
             log_interval = 1000
             nb_max_episode_steps = 2500
             gamma = 0.99
@@ -129,7 +129,7 @@ class Experiment:
         from tensorflow.keras.optimizers import Adam
         import tensorflow as tf
 
-        memory_buffer = CustomerSequentialMemory(limit=500000, window_length=1)
+        memory_buffer = CustomerSequentialMemory(limit=100000, window_length=1)
         multi_input_processor = Jiqian_MultiInputProcessor(A)
 
 
@@ -143,7 +143,7 @@ class Experiment:
 
         my_dqn = DQNAgent(processor= multi_input_processor,
                           model = rl_model.base_model,
-                          policy = eps_greedy_q_policy(0.2),
+                          policy = eps_greedy_q_policy(0.3),
                           test_policy = greedy_q_policy(),
                           start_policy = random_obs_policy(),
                           nb_total_agents = N,
@@ -154,7 +154,7 @@ class Experiment:
                           gamma = gamma,
                           custom_model_objects={'GraphConv': GraphConv})
 
-        my_dqn.compile(Adam(0.0001))
+        my_dqn.compile(Adam(0.001))
 
         if training:
 
