@@ -10,16 +10,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-# TEST_SETTINGS = True
-TEST_SETTINGS = False
+TEST_SETTINGS = True
 
-
-
-DEBUG = True
-# DEBUG = False
-
-# TRAINING = True
-TRAINING = False
 
 
 RENDER = False
@@ -30,11 +22,7 @@ NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-#MODEL = 'lstm'
-MODEL = 'gcn'
 
-
-RAY_RL = False
 
 NUM_HUMAN = 20
 NUM_MERGE_0 = 10
@@ -50,29 +38,25 @@ VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
 #######################################################
 
 
-
-Router = NearestMergeRouter if NEAREST_MERGE else SpecificMergeRouter
+# Router = NearestMergeRouter if NEAREST_MERGE else SpecificMergeRouter
 
 vehicles = VehicleParams()
 vehicles.add(veh_id="human",
              lane_change_params = SumoLaneChangeParams('strategic'),
              car_following_params = SumoCarFollowingParams(speed_mode='right_of_way',min_gap=5, tau=0.5, max_speed=MAX_HV_SPEED),
              acceleration_controller=(IDMController, {}),
-             routing_controller = (Router,{}),
              )
 
 vehicles.add(veh_id="merge_0",
-             lane_change_params = SumoLaneChangeParams('aggressive'),
-             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+             lane_change_params = SumoLaneChangeParams('strategic'),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
-             routing_controller = (Router,{}),
              color=VEH_COLORS[0])
 
 vehicles.add(veh_id="merge_1",
-             lane_change_params = SumoLaneChangeParams('aggressive'),
-             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+             lane_change_params = SumoLaneChangeParams('strategic'),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
-             routing_controller = (Router,{}),
              color=VEH_COLORS[1])
 
 initial_config = InitialConfig(spacing='uniform')
@@ -92,7 +76,7 @@ inflow.add(veh_type="merge_0",
            probability = 0.1,
            depart_lane='random',
            depart_speed = 'random',
-           route = 'highway_0',
+           route = 'merge_0',
            number = NUM_MERGE_0)
 
 inflow.add(veh_type="merge_1",
@@ -100,11 +84,11 @@ inflow.add(veh_type="merge_1",
            probability = 0.1,
            depart_lane='random',
            depart_speed = 'random',
-           route = 'highway_0',
+           route = 'merge_1',
            number = NUM_MERGE_1)
 
 
-sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER)
+sim_params = SumoParams(sim_step=0.1, restart_instance=True, render=RENDER,seed=None)
 
 
 from specific_environment import MergeEnv
@@ -142,28 +126,17 @@ flow_params = dict(
     initial=initial_config
 )
 # # number of time steps
-flow_params['env'].horizon = 2000
+flow_params['env'].horizon = 3000
 
 
 ############ EXPERIMENTS ##############
 if TEST_SETTINGS:
-    print("this is the test for the environment")
+    print("this is the run for the baseline model")
     from experiment import Experiment
     exp = Experiment(flow_params)
 
     # run the sumo simulation
-    exp.run(3)
-elif RAY_RL:
-    from ray_rl_setting import *
-else:
-    from rl_experiments import Experiment
+    exp.run(10)
 
-    exp = Experiment(flow_params)
-    # run the sumo simulation
-    exp.run(num_runs=2,training=TRAINING, \
-            num_human=NUM_HUMAN, \
-            num_cav=(NUM_MERGE_0+NUM_MERGE_1),\
-            model=MODEL,
-            debug=DEBUG)
 
 

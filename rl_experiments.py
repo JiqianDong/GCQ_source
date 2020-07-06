@@ -120,7 +120,7 @@ class Experiment:
         obs_space = Dict({'states':states,'adjacency':adjacency,'mask':mask})
         act_space = Box(low=0, high=1, shape = (N,), dtype=np.int32)
 
-        from graph_model import GraphicQNetworkKeras, LstmQNetworkKeras
+        from graph_model import GraphicQNetworkKeras, LstmQNetworkKeras, GraphicQNetworkKeras2
         from agents.memory import CustomerSequentialMemory
         from agents.processor import Jiqian_MultiInputProcessor
         from agents.dqn import DQNAgent
@@ -134,7 +134,7 @@ class Experiment:
 
 
         if model=='gcn':
-            rl_model = GraphicQNetworkKeras(N,F,obs_space,act_space)
+            rl_model = GraphicQNetworkKeras2(N,F,obs_space,act_space)
         elif model == 'lstm':
             rl_model = LstmQNetworkKeras(N,F,obs_space,act_space)
         else:
@@ -183,8 +183,13 @@ class Experiment:
             plot_training(logdir)
 
         else:
+            history_file = "./logs/" + model_name + '_testing_hist.txt'
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
             print("succssfully loaded")
-            my_dqn.test(self.env,nb_episodes=10)
+            hist = my_dqn.test(self.env,nb_episodes=num_runs)
+            # print(hist.history)
+
+            with open(history_file,'w') as f:
+                json.dump(hist.history, f)
 
 
