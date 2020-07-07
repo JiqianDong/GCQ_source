@@ -15,11 +15,11 @@ TEST_SETTINGS = False
 
 
 
-DEBUG = True
-# DEBUG = False
+#DEBUG = True
+DEBUG = False
 
-# TRAINING = True
-TRAINING = False
+TRAINING = True
+#TRAINING = False
 
 
 RENDER = False

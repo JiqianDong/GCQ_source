@@ -7,7 +7,7 @@ import json
 def plot_training(logdir):
     # data_file = './logs/training_hist.txt'
     import glob
-    data_files = glob.glob(logdir+'*.txt')
+    data_files = glob.glob(logdir+'*training_hist.txt')
     # print(data_files)
     losses = []
     rewards = []
