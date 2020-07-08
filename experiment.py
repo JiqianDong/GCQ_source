@@ -85,7 +85,7 @@ class Experiment:
 
         logging.info("Initializing environment.")
 
-    def run(self, num_runs, rl_actions=None, convert_to_csv=False):
+    def run(self, num_runs, num_cav=20, num_human = 20,rl_actions=None, convert_to_csv=False):
         """Run the given network for a set number of runs.
 
         Parameters
@@ -141,7 +141,9 @@ class Experiment:
                     break
             rewards.append(ret)
 
-        with open('./logs/rule_based_rewards.txt','w') as f:
+
+        file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format("rule_based",num_cav,num_human)
+        with open(file_name,'w') as f:
             json.dump({'episode_reward':rewards},f)
         self.env.terminate()
 

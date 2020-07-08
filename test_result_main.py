@@ -64,14 +64,14 @@ for MODEL in ['gcn','lstm']:
 
         vehicles.add(veh_id="merge_0",
                      lane_change_params = SumoLaneChangeParams('aggressive'),
-                     car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+                     car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
                      acceleration_controller=(RLController, {}),
                      routing_controller = (Router,{}),
                      color=VEH_COLORS[0])
 
         vehicles.add(veh_id="merge_1",
                      lane_change_params = SumoLaneChangeParams('aggressive'),
-                     car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+                     car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
                      acceleration_controller=(RLController, {}),
                      routing_controller = (Router,{}),
                      color=VEH_COLORS[1])

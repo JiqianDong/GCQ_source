@@ -10,8 +10,8 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-# TEST_SETTINGS = True
-TEST_SETTINGS = False
+TEST_SETTINGS = True
+# TEST_SETTINGS = False
 
 
 
@@ -65,14 +65,14 @@ vehicles.add(veh_id="human",
 
 vehicles.add(veh_id="merge_0",
              lane_change_params = SumoLaneChangeParams('aggressive'),
-             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[0])
 
 vehicles.add(veh_id="merge_1",
              lane_change_params = SumoLaneChangeParams('aggressive'),
-             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=0.0, tau=0.5, max_speed=MAX_CAV_SPEED),
+             car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
              acceleration_controller=(RLController, {}),
              routing_controller = (Router,{}),
              color=VEH_COLORS[1])
@@ -83,7 +83,7 @@ initial_config = InitialConfig(spacing='uniform')
 inflow = InFlows()
 inflow.add(veh_type="human",
            edge="highway_0",
-           probability=0.4,
+           probability=actual_num_human/100,
            depart_lane='random',
            depart_speed = 'random',
            route = 'highway_0',
@@ -154,7 +154,7 @@ if TEST_SETTINGS:
     exp = Experiment(flow_params)
 
     # run the sumo simulation
-    exp.run(3)
+    exp.run(num_runs=3,num_cav=(NUM_MERGE_0+NUM_MERGE_1),num_human=actual_num_human)
 elif RAY_RL:
     from ray_rl_setting import *
 else:
