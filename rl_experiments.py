@@ -6,7 +6,7 @@ import logging
 import time
 import os
 import numpy as np
-import pickle
+import json
 
 class Experiment:
     """
@@ -86,7 +86,7 @@ class Experiment:
         logging.info("Initializing environment.")
 
 
-    def run(self,num_runs,training,num_human,num_cav, model, debug):
+    def run(self,num_runs,training,num_human,actual_num_human,num_cav, model, debug):
         model_name = model+'_hv_'+str(num_human)+'_cav_'+str(num_cav)
 
         if debug:
@@ -100,7 +100,7 @@ class Experiment:
             nb_steps_warmup = 200000
             batch_size = 32
             total_steps = 800000
-            log_interval = 1000
+            log_interval = 4000
             nb_max_episode_steps = 2500
             gamma = 0.99
 
@@ -183,13 +183,14 @@ class Experiment:
             plot_training(logdir)
 
         else:
-            history_file = "./logs/" + model_name + '_testing_hist.txt'
+            history_file = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format(model,num_cav,actual_num_human)
+
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
             print("succssfully loaded")
             hist = my_dqn.test(self.env,nb_episodes=num_runs)
             # print(hist.history)
 
-            with open(history_file,'w') as f:
-                json.dump(hist.history, f)
+            # with open(history_file,'w') as f:
+            #     json.dump(hist.history, f)
 
 

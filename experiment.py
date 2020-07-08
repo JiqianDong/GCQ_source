@@ -123,41 +123,25 @@ class Experiment:
 
         # time profiling information
         t = time.time()
-        times = []
-        states = []
         rewards = []
-        dones = []
-        actions = []
 
         for i in range(num_runs):
             ret = 0
-            vel = []
-            custom_vals = {key: [] for key in self.custom_callables.keys()}
             state = self.env.reset()
 
             for j in range(num_steps):
                 t0 = time.time()
                 action = rl_actions(state)
                 state, reward, done, _ = self.env.step(action)
-                states.append(state)
-                rewards.append(reward)
-                actions.append(action)
-                dones.append(done)
-                t1 = time.time()
-                times.append(1 / (t1 - t0))
 
-                # Compute the velocity speeds and cumulative returns.
-                # veh_ids = self.env.k.vehicle.get_ids()
-                # vel.append(np.mean(self.env.k.vehicle.get_speed(veh_ids)))
-                # ret += reward
+                ret += reward
 
                 if done:
-
                     print('finished with step: ',j)
                     break
-        # experience = {'state':states,'action':actions,'reward':rewards,'done':dones}
-        # with open('training_data.pkl','wb') as f:
-        #     pickle.dump(experience,f)
+            rewards.append(ret)
 
+        with open('./logs/rule_based_rewards.txt','w') as f:
+            json.dump({'episode_reward':rewards},f)
         self.env.terminate()
 

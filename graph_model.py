@@ -108,13 +108,13 @@ class GraphicQNetworkKeras2():
         x1 = Dense(32,activation='relu',name='post_gcn_1')(x1)
 
 
-        x2 = GraphConv(32, activation='relu',name='gcn2')([x1, A_in])
-        x2 = Dense(32,activation='relu',name='post_gcn_2')(x2)
+        # x2 = GraphConv(32, activation='relu',name='gcn2')([x1, A_in])
+        # x2 = Dense(32,activation='relu',name='post_gcn_2')(x2)
 
 
         ###  Action and filter
-        x3 = Concatenate()([x,x1,x2])
-        x3 = Dense(32, activation='relu',name='policy_1')(x3)
+        x3 = Concatenate()([x,x1])
+        x3 = Dense(64, activation='relu',name='policy_1')(x3)
         x3 = Dense(32, activation='relu',name='policy_2')(x3)
 
         x3 = Dense(num_outputs, activation='linear',name='policy_output')(x3)

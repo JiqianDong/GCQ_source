@@ -48,6 +48,10 @@ class MergeEnv(Env):
 
         human_ids = sorted(self.k.vehicle.get_human_ids())
 
+        # If too many human ids
+        if len(human_ids)>num_hv:
+            human_ids = human_ids[:num_hv]
+
         # assert len(ids) != len(human_ids) + len(rl_ids)
 
         states = np.zeros([N,3+num_lanes+self.n_unique_intentions])

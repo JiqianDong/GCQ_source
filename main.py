@@ -18,12 +18,12 @@ TEST_SETTINGS = False
 #DEBUG = True
 DEBUG = False
 
-TRAINING = True
-#TRAINING = False
+# TRAINING = True
+TRAINING = False
 
 
-RENDER = False
-# RENDER = True
+# RENDER = False
+RENDER = True
 
 
 NEAREST_MERGE = False
@@ -37,6 +37,8 @@ MODEL = 'gcn'
 RAY_RL = False
 
 NUM_HUMAN = 20
+actual_num_human = 20
+
 NUM_MERGE_0 = 10
 NUM_MERGE_1 = 10
 
@@ -81,11 +83,11 @@ initial_config = InitialConfig(spacing='uniform')
 inflow = InFlows()
 inflow.add(veh_type="human",
            edge="highway_0",
-           probability=0.2,
+           probability=0.4,
            depart_lane='random',
            depart_speed = 'random',
            route = 'highway_0',
-           number = NUM_HUMAN)
+           number = actual_num_human)
 
 inflow.add(veh_type="merge_0",
            edge="highway_0",
@@ -160,8 +162,9 @@ else:
 
     exp = Experiment(flow_params)
     # run the sumo simulation
-    exp.run(num_runs=2,training=TRAINING, \
+    exp.run(num_runs=10,training=TRAINING, \
             num_human=NUM_HUMAN, \
+            actual_num_human = actual_num_human,\
             num_cav=(NUM_MERGE_0+NUM_MERGE_1),\
             model=MODEL,
             debug=DEBUG)
