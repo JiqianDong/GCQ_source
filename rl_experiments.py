@@ -190,7 +190,7 @@ class Experiment:
             hist = my_dqn.test(self.env,nb_episodes=num_runs)
             # print(hist.history)
 
-            # with open(history_file,'w') as f:
-            #     json.dump(hist.history, f)
+            with open(history_file,'w') as f:
+                json.dump(hist.history, f)
 
 
