@@ -105,8 +105,8 @@ class MergeEnv(Env):
 
     def compute_reward(self,rl_actions,**kwargs):
         # w_intention = 10
-        w_intention = 4
-        w_speed = 0.2
+        w_intention = 3
+        w_speed = 0.8
         w_p_lane_change = 0.05
         w_p_crash = 0.8
 

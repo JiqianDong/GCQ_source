@@ -10,28 +10,28 @@ from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 #######################################################
 ########### Configurations
-TEST_SETTINGS = True
-# TEST_SETTINGS = False
+#TEST_SETTINGS = True
+TEST_SETTINGS = False
 
 
 
 #DEBUG = True
 DEBUG = False
 
-# TRAINING = True
-TRAINING = False
+TRAINING = True
+#TRAINING = False
 
 
-# RENDER = False
-RENDER = True
+RENDER = False
+#RENDER = True
 
 
 NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-#MODEL = 'lstm'
-MODEL = 'gcn'
+MODEL = 'lstm'
+#MODEL = 'gcn'
 
 
 RAY_RL = False
@@ -114,7 +114,7 @@ from specific_environment import MergeEnv
 intention_dic = {"human":0,"merge_0":1,"merge_1":1} if NEAREST_MERGE else {"human":0,"merge_0":1,"merge_1":2}
 terminal_edges = ['off_ramp_0','off_ramp_1','highway_2']
 
-env_params = EnvParams(warmup_steps=50,
+env_params = EnvParams(warmup_steps=100,
                        additional_params={"intention":intention_dic,
                                           "max_cav_speed":MAX_CAV_SPEED,
                                           "max_hv_speed":MAX_HV_SPEED})

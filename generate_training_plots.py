@@ -18,7 +18,7 @@ def smooth(scalars, weight):  # Weight between 0 and 1
 
     return smoothed
 
-def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85):
+def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y_lim=None, reward_y_lim=None):
     import glob
     data_files = glob.glob(logdir+'*training_hist.txt')
     losses = []
@@ -49,9 +49,11 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85):
 
     plt.figure()
     for (loss,loss_smoothed,name) in zip(losses,losses_smoothed,names):
-        p = plt.plot(np.arange(len(loss)),loss,label=name,alpha=0.2)
+        p = plt.plot(np.arange(len(loss)),loss,alpha=0.2)
         plt.plot(np.arange(len(loss_smoothed)),loss_smoothed,label=name,c=p[0].get_color())
     plt.legend()
+    if loss_y_lim:
+        plt.ylim(loss_y_lim)
     plt.title('Loss vs episode')
     plt.savefig('./figures/loss.png',dpi=300)
 
@@ -63,6 +65,8 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85):
 
         plt.plot(np.arange(len(reward_smoothed)),reward_smoothed,label=name,c=p[0].get_color())
     plt.legend()
+    if reward_y_lim:
+        plt.ylim(reward_y_lim)
     plt.title('rewards vs episode')
     plt.savefig('./figures/rewards.png',dpi=300)
 
@@ -72,4 +76,5 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85):
 
 if __name__ == '__main__':
     import glob
-    plot_training('./logs/',0.3,0.85)
+    plot_training('./logs/',0.3,0.85,(10,70),(-15000,3000))
+    #plot_training('./logs/',0.3,0.9)
