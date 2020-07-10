@@ -6,7 +6,7 @@ import logging
 import time
 import os
 import numpy as np
-import pickle
+import json
 
 class Experiment:
     """

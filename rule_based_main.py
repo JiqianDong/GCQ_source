@@ -15,8 +15,8 @@ actual_num_human_list = [10,20,30,40,50]
 for actual_num_human in actual_num_human_list:
     TEST_SETTINGS = True
 
-    # RENDER = False
-    RENDER = True
+    RENDER = False
+    # RENDER = True
 
 
     NEAREST_MERGE = False

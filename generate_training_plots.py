@@ -26,6 +26,7 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y
     rewards = []
     rewards_smoothed = []
     names = []
+    data_files.sort()
     for data_file in data_files:
 
         with open(data_file,'rb') as f:
@@ -64,6 +65,9 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y
         p = plt.plot(np.arange(len(reward)),reward,alpha=0.2)
 
         plt.plot(np.arange(len(reward_smoothed)),reward_smoothed,label=name,c=p[0].get_color())
+
+    plt.plot([0,len(reward_smoothed)-1],[-6281.482498+2000]*2,label="rule_based")
+
     plt.legend()
     if reward_y_lim:
         plt.ylim(reward_y_lim)
@@ -76,5 +80,5 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y
 
 if __name__ == '__main__':
     import glob
-    plot_training('./logs/',0.3,0.85,(10,70),(-15000,3000))
+    plot_training('./logs/',0.3,0.9,(10,70),(-10000,3000))
     #plot_training('./logs/',0.3,0.9)
