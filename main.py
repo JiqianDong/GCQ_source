@@ -18,20 +18,20 @@ TEST_SETTINGS = False
 #DEBUG = True
 DEBUG = False
 
-TRAINING = True
-#TRAINING = False
+#TRAINING = True
+TRAINING = False
 
 
-RENDER = False
-#RENDER = True
+#RENDER = False
+RENDER = True
 
 
 NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-MODEL = 'lstm'
-#MODEL = 'gcn'
+#MODEL = 'lstm'
+MODEL = 'gcn'
 
 
 RAY_RL = False
