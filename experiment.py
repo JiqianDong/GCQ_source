@@ -104,7 +104,7 @@ class Experiment:
         info_dict : dict < str, Any >
             contains returns, average speed per step
         """
-        num_steps = self.env.env_params.horizon
+        num_steps = 10000 #maximum steps
 
         if rl_actions is None:
             def rl_actions(*_):
@@ -120,10 +120,9 @@ class Experiment:
                         return np.ones(len(rl_ids))
                 else:
                     return None
-
-        # time profiling information
-        t = time.time()
+   
         rewards = []
+        total_steps = []
 
         for i in range(num_runs):
             ret = 0
@@ -140,10 +139,10 @@ class Experiment:
                     print('finished with step: ',j)
                     break
             rewards.append(ret)
+            total_steps.append(j+1)
 
-
-        file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format("rule_based",num_cav,num_human)
+        file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist2.txt".format("rule_based",num_cav,num_human)
         with open(file_name,'w') as f:
-            json.dump({'episode_reward':rewards},f)
+            json.dump({'episode_reward':rewards,'num_steps':total_steps},f)
         self.env.terminate()
 

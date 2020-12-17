@@ -14,14 +14,14 @@ class MergeEnv(Env):
         """Identify the dimensions and bounds of the observation space.
         """
         N = self.net_params.additional_params['num_vehicles']
-        F = 3 + self.net_params.additional_params['highway_lanes']\
+        F = 2 + self.net_params.additional_params['highway_lanes']\
             + self.n_unique_intentions
 
         states = Box(low=-np.inf, high=np.inf, shape=(N,F), dtype=np.float32)
         adjacency = Box(low=0, high=1, shape = (N,N), dtype=np.int32)
         mask = Box(low=0, high=1, shape = (N,), dtype=np.int32)
 
-        return Tuple(states,adjacency,mask)
+        return Tuple([states,adjacency,mask])
 
     @property
     def action_space(self):
@@ -34,8 +34,8 @@ class MergeEnv(Env):
         """construct a graph for each time step
         """
         N = self.net_params.additional_params['num_vehicles']
-        num_cav = self.net_params.additional_params['num_cav']
-        num_hv = self.net_params.additional_params['num_hv']
+        # num_cav = self.net_params.additional_params['num_cav'] # maximum number of CAVs
+        num_hv = self.net_params.additional_params['num_hv'] # maximum number of HDVs
 
         num_lanes = self.net_params.additional_params['highway_lanes']
 
@@ -54,7 +54,7 @@ class MergeEnv(Env):
 
         # assert len(ids) != len(human_ids) + len(rl_ids)
 
-        states = np.zeros([N,3+num_lanes+self.n_unique_intentions])
+        states = np.zeros([N,2+num_lanes+self.n_unique_intentions])
         adjacency = np.zeros([N,N])
         mask = np.zeros(N)
 
@@ -64,7 +64,9 @@ class MergeEnv(Env):
 
             # numerical data (speed, location)
             speeds = np.array(self.k.vehicle.get_speed(ids)).reshape(-1,1)
-            positions = np.array([self.k.vehicle.get_absolute_position(i) for i in ids])
+
+            # positions = np.array([self.k.vehicle.get_absolute_position(i) for i in ids])  # x y location
+            xs = np.array([self.k.vehicle.get_x_by_id(i) for i in ids]).reshape(-1,1)
 
             # categorical data  1 hot encoding: (lane location, intention)
             lanes_column = np.array(self.k.vehicle.get_lane(ids))
@@ -76,15 +78,16 @@ class MergeEnv(Env):
             intention = np.zeros([len(ids), self.n_unique_intentions])
             intention[np.arange(len(ids)),types_column] = 1
 
-            observed_states = np.c_[positions,speeds,lanes,intention]
+            observed_states = np.c_[xs,speeds,lanes,intention]
 
             # assemble into the NxF states matrix
             states[:len(human_ids),:] = observed_states[:len(human_ids),:]
             states[num_hv:num_hv+len(rl_ids),:] = observed_states[len(human_ids):,:]
 
+            states[:,0]/=self.net_params.additional_params['highway_length']
 
             # construct the adjacency matrix
-            dist_matrix = euclidean_distances(positions)
+            dist_matrix = euclidean_distances(xs)
             adjacency_small = np.zeros_like(dist_matrix)
             adjacency_small[dist_matrix<20] = 1
             adjacency_small[-len(rl_ids):,-len(rl_ids):] = 1

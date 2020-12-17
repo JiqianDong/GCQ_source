@@ -8,6 +8,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+line_type_dic = {"gcn":'-','lstm':':','rule_based':'--'}
+line_width_dic = {"gcn":1,'lstm':2,'rule_based':1}
+
 def smooth(scalars, weight):  # Weight between 0 and 1
     last = scalars[0]  # First value in the plot (first timestep)
     smoothed = list()
@@ -17,6 +20,7 @@ def smooth(scalars, weight):  # Weight between 0 and 1
         last = smoothed_val                                  # Anchor the last smoothed value
 
     return smoothed
+
 
 def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y_lim=None, reward_y_lim=None):
     import glob
@@ -50,29 +54,35 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y
 
     plt.figure()
     for (loss,loss_smoothed,name) in zip(losses,losses_smoothed,names):
-        p = plt.plot(np.arange(len(loss)),loss,alpha=0.2)
-        plt.plot(np.arange(len(loss_smoothed)),loss_smoothed,label=name,c=p[0].get_color())
+        p = plt.plot(np.arange(len(loss)),loss,alpha=0.2,linestyle=line_type_dic[name])
+        plt.plot(np.arange(len(loss_smoothed)),loss_smoothed,label=name,c=p[0].get_color(),linestyle=line_type_dic[name],linewidth=line_width_dic[name])
     plt.legend()
     if loss_y_lim:
         plt.ylim(loss_y_lim)
     plt.title('Loss vs episode')
-    plt.savefig('./figures/loss.png',dpi=300)
+    plt.xlabel("episode (after training start)")
+    plt.ylabel("loss")
+    plt.savefig('./figures/loss.png',dpi=300,bbox_inches='tight')
 
     plt.figure()
 
     for (reward,reward_smoothed,name) in zip(rewards,rewards_smoothed,names):
 
-        p = plt.plot(np.arange(len(reward)),reward,alpha=0.2)
+        p = plt.plot(np.arange(len(reward)),reward,alpha=0.1)
 
-        plt.plot(np.arange(len(reward_smoothed)),reward_smoothed,label=name,c=p[0].get_color())
+        plt.plot(np.arange(len(reward_smoothed)),reward_smoothed,label=name,c=p[0].get_color(),linestyle=line_type_dic[name],linewidth=line_width_dic[name])
 
-    plt.plot([0,len(reward_smoothed)-1],[-6281.482498+2000]*2,label="rule_based")
+
+    name = "rule_based"
+    plt.plot([0,len(reward_smoothed)-1],[-6281.482498+2000]*2,label=name, linestyle=line_type_dic[name])
 
     plt.legend()
     if reward_y_lim:
         plt.ylim(reward_y_lim)
     plt.title('rewards vs episode')
-    plt.savefig('./figures/rewards.png',dpi=300)
+    plt.ylabel("episode reward")
+    plt.xlabel("episode")
+    plt.savefig('./figures/rewards.png',dpi=300,bbox_inches='tight')
 
 
 
@@ -80,5 +90,5 @@ def plot_training(logdir,loss_smooth_weight=0.3,reward_smooth_weight=0.85,loss_y
 
 if __name__ == '__main__':
     import glob
-    plot_training('./logs/',0.3,0.9,(10,70),(-10000,3000))
+    plot_training('./logs/',0,0.9,(10,70),(-10000,3000))
     #plot_training('./logs/',0.3,0.9)

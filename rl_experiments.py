@@ -106,7 +106,7 @@ class Experiment:
 
 
 
-        F = 3 + self.env.net_params.additional_params['highway_lanes'] + self.env.n_unique_intentions # input feature size
+        F = 2 + self.env.net_params.additional_params['highway_lanes'] + self.env.n_unique_intentions # input feature size
         N = num_human + num_cav
         A = 3
 

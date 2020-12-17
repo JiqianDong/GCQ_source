@@ -30,9 +30,6 @@ for MODEL in ['gcn','lstm']:
         # NEAREST_MERGE = True
 
 
-        #MODEL = 'lstm'
-        # MODEL = 'gcn'
-
 
         RAY_RL = False
 

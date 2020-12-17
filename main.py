@@ -5,7 +5,8 @@ from controller import SpecificMergeRouter,NearestMergeRouter
 
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
-
+import tensorflow as tf 
+tf.config.set_visible_devices([], 'GPU')
 
 
 #######################################################
@@ -15,14 +16,14 @@ TEST_SETTINGS = False
 
 
 
-#DEBUG = True
+# DEBUG = True
 DEBUG = False
 
-#TRAINING = True
+# TRAINING = True
 TRAINING = False
 
 
-#RENDER = False
+# RENDER = False
 RENDER = True
 
 
@@ -30,7 +31,7 @@ NEAREST_MERGE = False
 # NEAREST_MERGE = True
 
 
-#MODEL = 'lstm'
+# MODEL = 'lstm'
 MODEL = 'gcn'
 
 
