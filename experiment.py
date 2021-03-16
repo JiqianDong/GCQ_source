@@ -85,7 +85,7 @@ class Experiment:
 
         logging.info("Initializing environment.")
 
-    def run(self, num_runs, num_cav=20, num_human = 20,rl_actions=None, convert_to_csv=False):
+    def run(self, num_runs, num_cav=20, num_human = 20,  num_merge_0=None, num_merge_1=None, rl_actions=None, convert_to_csv=False):
         """Run the given network for a set number of runs.
 
         Parameters
@@ -141,7 +141,10 @@ class Experiment:
             rewards.append(ret)
             total_steps.append(j+1)
 
-        file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist2.txt".format("rule_based",num_cav,num_human)
+        if num_merge_0:
+            file_name = "./logs/test/vary_ramp_popularity/{}_cav0_{}_cav1_{}_hv_{}_testing_hist.txt".format("rule_based",num_merge_0,num_merge_1,num_human)
+        else:
+            file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist2.txt".format("rule_based",num_cav,num_human)
         with open(file_name,'w') as f:
             json.dump({'episode_reward':rewards,'num_steps':total_steps},f)
         self.env.terminate()

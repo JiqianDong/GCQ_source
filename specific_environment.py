@@ -257,6 +257,7 @@ class MergeEnv(Env):
                     elif self.n_unique_intentions == 2: # nearest merge
                         num_full_filled += (current_edge == 'off_ramp_0')*1
                         num_half_filled += (current_edge == 'off_ramp_1')*1
+                        print("wrongs")
 
                     else:
                         raise Exception("unknown num of unique n_unique_intentions")

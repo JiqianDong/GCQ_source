@@ -6,9 +6,14 @@ from controller import SpecificMergeRouter,NearestMergeRouter
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 
-actual_num_human_list = [10,20,30,40,50]
+# actual_num_human_list = [10,20,30,40,50]
+actual_num_human = 20
+actual_num_cav_list = [(0,20),(5,15),(15,5),(20,0)]
+
 for MODEL in ['gcn','lstm']:
-    for actual_num_human in actual_num_human_list:
+    # for actual_num_human in actual_num_human_list:
+    for (NUM_MERGE_0,NUM_MERGE_1) in actual_num_cav_list:
+
 
 
         # TEST_SETTINGS = True
@@ -35,8 +40,8 @@ for MODEL in ['gcn','lstm']:
 
         NUM_HUMAN = 20
 
-        NUM_MERGE_0 = 10
-        NUM_MERGE_1 = 10
+        # NUM_MERGE_0 = 10
+        # NUM_MERGE_1 = 10
 
         MAX_CAV_SPEED = 14
         MAX_HV_SPEED = 10
@@ -44,7 +49,7 @@ for MODEL in ['gcn','lstm']:
 
         VEH_COLORS = ['red','red'] if NEAREST_MERGE else ['red','green']
 
-
+        print ("starts test for %d cav 0, %d cav 1"%(NUM_MERGE_0,NUM_MERGE_1))
         #######################################################
 
 
@@ -53,21 +58,21 @@ for MODEL in ['gcn','lstm']:
 
         vehicles = VehicleParams()
         vehicles.add(veh_id="human",
-                     lane_change_params = SumoLaneChangeParams('strategic'),
+                     lane_change_params = SumoLaneChangeParams('only_strategic_safe'),
                      car_following_params = SumoCarFollowingParams(speed_mode='right_of_way',min_gap=5, tau=0.5, max_speed=MAX_HV_SPEED),
                      acceleration_controller=(IDMController, {}),
                      routing_controller = (Router,{}),
                      )
 
         vehicles.add(veh_id="merge_0",
-                     lane_change_params = SumoLaneChangeParams('aggressive'),
+                     lane_change_params = SumoLaneChangeParams('no_strategic_aggressive'),
                      car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
                      acceleration_controller=(RLController, {}),
                      routing_controller = (Router,{}),
                      color=VEH_COLORS[0])
 
         vehicles.add(veh_id="merge_1",
-                     lane_change_params = SumoLaneChangeParams('aggressive'),
+                     lane_change_params = SumoLaneChangeParams('no_strategic_aggressive'),
                      car_following_params = SumoCarFollowingParams(speed_mode='no_collide',min_gap=1, tau=0.5, max_speed=MAX_CAV_SPEED),
                      acceleration_controller=(RLController, {}),
                      routing_controller = (Router,{}),
@@ -163,6 +168,8 @@ for MODEL in ['gcn','lstm']:
                     actual_num_human = actual_num_human,\
                     num_cav=(NUM_MERGE_0+NUM_MERGE_1),\
                     model=MODEL,
-                    debug=DEBUG)
+                    debug=DEBUG,
+                    num_merge_0=NUM_MERGE_0, 
+                    num_merge_1=NUM_MERGE_1)
 
 

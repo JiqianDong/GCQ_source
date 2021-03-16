@@ -10,7 +10,7 @@ import shutil
 import subprocess
 from flow.renderer.pyglet_renderer import PygletRenderer as Renderer
 from flow.utils.flow_warnings import deprecated_attribute
-
+from collections import Counter
 import gym
 from gym.spaces import Box
 from gym.spaces import Tuple
@@ -278,6 +278,8 @@ class Env(gym.Env):
 
         self.setup_initial_state()
 
+        self.infos = {"num_full_filled":0, "num_half_filled":0}
+
     def setup_initial_state(self):
         """Store information on the initial state of vehicles in the network.
 
@@ -411,18 +413,21 @@ class Env(gym.Env):
         num_full_filled,num_half_filled = self.check_full_fill()
 
         done = (len(self.exited_vehicles) == self.net_params.additional_params['num_cav'])
-        if done:
-            print('done in: ', self.time_counter)
+   
 
 
         # compute the info for each agent
-        infos = {}
+        infos = {"num_full_filled":num_full_filled,"num_half_filled":num_half_filled}
+        self.infos = Counter(self.infos) + Counter(infos) 
+        
 
         # print (self.k.vehicle.num_vehicles)
         # compute the reward
 
         reward = self.compute_reward(rl_actions, fail=crash_ids,num_full_filled=num_full_filled, num_half_filled=num_half_filled)
-
+        if done:
+            print(self.infos)
+            print('done in: ', self.time_counter)
 
         return next_observation, reward, done, infos
 

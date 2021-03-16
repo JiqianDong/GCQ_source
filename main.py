@@ -6,7 +6,7 @@ from controller import SpecificMergeRouter,NearestMergeRouter
 from network import HighwayRampsNetwork, ADDITIONAL_NET_PARAMS
 
 import tensorflow as tf 
-tf.config.set_visible_devices([], 'GPU')
+# tf.config.set_visible_devices([], 'GPU')
 
 
 #######################################################

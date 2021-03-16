@@ -244,7 +244,7 @@ class DQNAgent(AbstractDQNAgent):
         else:
 
             q_values = self.compute_q_values(state)
-            print(q_values)
+            # print(q_values)
             action = self.test_policy.select_action(q_values=q_values)
 
         # Book-keeping.

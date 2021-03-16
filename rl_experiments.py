@@ -86,7 +86,7 @@ class Experiment:
         logging.info("Initializing environment.")
 
 
-    def run(self,num_runs,training,num_human,actual_num_human,num_cav, model, debug):
+    def run(self,num_runs,training,num_human,actual_num_human,num_cav, model, debug, num_merge_0=None, num_merge_1=None):
         model_name = model+'_hv_'+str(num_human)+'_cav_'+str(num_cav)
 
         if debug:
@@ -183,7 +183,10 @@ class Experiment:
             plot_training(logdir)
 
         else:
-            history_file = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format(model,num_cav,actual_num_human)
+            if num_merge_0:
+                history_file = "./logs/test/vary_ramp_popularity/{}_cav0_{}_cav1_{}_hv_{}_testing_hist.txt".format(model,num_merge_0,num_merge_1,actual_num_human)
+            else:
+                history_file = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format(model,num_cav,actual_num_human)
 
             my_dqn.load_weights('./models/dqn_{}.h5f'.format(model_name))
             print("succssfully loaded")
