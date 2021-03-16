@@ -141,7 +141,7 @@ class Experiment:
             rewards.append(ret)
             total_steps.append(j+1)
 
-        if num_merge_0:
+        if num_merge_0 is not None:
             file_name = "./logs/test/vary_ramp_popularity/{}_cav0_{}_cav1_{}_hv_{}_testing_hist.txt".format("rule_based",num_merge_0,num_merge_1,num_human)
         else:
             file_name = "./logs/test/{}_cav_{}_hv_{}_testing_hist2.txt".format("rule_based",num_cav,num_human)

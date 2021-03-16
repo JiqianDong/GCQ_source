@@ -183,7 +183,7 @@ class Experiment:
             plot_training(logdir)
 
         else:
-            if num_merge_0:
+            if num_merge_0 is not None:
                 history_file = "./logs/test/vary_ramp_popularity/{}_cav0_{}_cav1_{}_hv_{}_testing_hist.txt".format(model,num_merge_0,num_merge_1,actual_num_human)
             else:
                 history_file = "./logs/test/{}_cav_{}_hv_{}_testing_hist.txt".format(model,num_cav,actual_num_human)
